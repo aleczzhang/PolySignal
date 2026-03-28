@@ -5,6 +5,7 @@
 .env
 .env.local
 .env.*.local
+kalshiAPI.txt
 
 # Dependencies
 node_modules/
