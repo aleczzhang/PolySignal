@@ -1,0 +1,192 @@
+{
+  "food": [
+    {
+      "id": "poly-food-001",
+      "title": "Will US egg prices exceed $4.50/dozen nationally by May 2026?",
+      "probability": 0.72,
+      "volume": 284500,
+      "daysToResolution": 34,
+      "decayWeight": 0.91,
+      "historicalVolatility": 0.062,
+      "probHistory": [0.41,0.43,0.45,0.44,0.46,0.49,0.51,0.53,0.55,0.54,0.57,0.59,0.61,0.60,0.63,0.65,0.64,0.66,0.68,0.67,0.69,0.70,0.71,0.70,0.72,0.73,0.71,0.72,0.72,0.72],
+      "volumeHistory": [4200,3900,5100,6200,5800,7100,8300,9200,10100,9800,11200,12400,13100,12700,14300,15800,14900,16200,17400,16800,18100,19300,18700,20100,21500,20800,22300,23400,22900,24100],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-food-002",
+      "title": "Will US food CPI year-over-year exceed 4% in Q2 2026?",
+      "probability": 0.58,
+      "volume": 412300,
+      "daysToResolution": 65,
+      "decayWeight": 0.78,
+      "historicalVolatility": 0.048,
+      "probHistory": [0.31,0.33,0.32,0.34,0.36,0.35,0.37,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.57,0.58,0.58,0.58],
+      "volumeHistory": [8100,7800,8400,9100,8700,9300,10200,11100,10800,11400,12300,13200,12900,13700,14600,15100,14800,15700,16400,17100,16800,17600,18300,19100,18800,19500,20200,21100,20700,21400],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-food-003",
+      "title": "Will the USDA issue an emergency food supply declaration in 2026?",
+      "probability": 0.19,
+      "volume": 156800,
+      "daysToResolution": 278,
+      "decayWeight": 0.34,
+      "historicalVolatility": 0.031,
+      "probHistory": [0.11,0.11,0.12,0.12,0.13,0.13,0.14,0.14,0.14,0.15,0.15,0.15,0.16,0.16,0.16,0.17,0.17,0.17,0.18,0.18,0.18,0.18,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19],
+      "volumeHistory": [2100,2000,2200,2100,2300,2200,2400,2500,2400,2600,2700,2800,2700,2900,3000,3100,3000,3200,3300,3400,3300,3500,3600,3700,3600,3800,3900,4000,3900,4100],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-food-004",
+      "title": "Will US corn futures (front month) exceed $5.50/bushel by June 2026?",
+      "probability": 0.44,
+      "volume": 341200,
+      "daysToResolution": 96,
+      "decayWeight": 0.71,
+      "historicalVolatility": 0.055,
+      "probHistory": [0.28,0.29,0.30,0.31,0.29,0.31,0.33,0.34,0.36,0.35,0.37,0.38,0.37,0.39,0.40,0.41,0.40,0.42,0.43,0.42,0.44,0.43,0.45,0.44,0.44,0.45,0.44,0.44,0.44,0.44],
+      "volumeHistory": [5600,5400,5800,6100,5900,6300,6700,7100,6900,7300,7800,8200,7900,8400,8900,9300,9100,9600,10100,9800,10300,10700,10400,10900,11200,10900,11400,11800,11500,12000],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-food-005",
+      "title": "Will avian flu cause US egg production to fall below 2024 baseline by April 2026?",
+      "probability": 0.81,
+      "volume": 521600,
+      "daysToResolution": 4,
+      "decayWeight": 0.98,
+      "historicalVolatility": 0.044,
+      "probHistory": [0.52,0.55,0.57,0.58,0.61,0.63,0.65,0.64,0.67,0.68,0.70,0.71,0.73,0.72,0.74,0.75,0.74,0.76,0.77,0.76,0.78,0.79,0.78,0.80,0.80,0.81,0.80,0.81,0.81,0.81],
+      "volumeHistory": [9800,10200,10700,11300,11100,11800,12400,12900,12600,13300,14100,14800,14400,15200,16100,16800,16400,17300,18200,17800,18800,19700,19200,20300,21100,20600,21800,22900,22300,23600],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-food-006",
+      "title": "Will SNAP program enrollment increase by more than 5% in H1 2026?",
+      "probability": 0.36,
+      "volume": 98400,
+      "daysToResolution": 95,
+      "decayWeight": 0.72,
+      "historicalVolatility": 0.028,
+      "probHistory": [0.24,0.25,0.25,0.26,0.26,0.27,0.27,0.28,0.28,0.29,0.29,0.30,0.30,0.31,0.31,0.32,0.32,0.33,0.33,0.34,0.34,0.35,0.35,0.36,0.36,0.36,0.36,0.36,0.36,0.36],
+      "volumeHistory": [1600,1500,1700,1600,1800,1700,1900,1800,2000,1900,2100,2000,2200,2100,2300,2200,2400,2300,2500,2400,2600,2500,2700,2600,2800,2700,2900,2800,3000,2900],
+      "source": "polymarket",
+      "isResolved": false
+    }
+  ],
+  "energy": [
+    {
+      "id": "poly-energy-001",
+      "title": "Will WTI crude oil exceed $90/barrel by June 2026?",
+      "probability": 0.29,
+      "volume": 687400,
+      "daysToResolution": 96,
+      "decayWeight": 0.71,
+      "historicalVolatility": 0.071,
+      "probHistory": [0.18,0.19,0.21,0.20,0.22,0.23,0.22,0.24,0.25,0.26,0.25,0.27,0.28,0.27,0.29,0.28,0.30,0.29,0.28,0.29,0.30,0.29,0.30,0.29,0.29,0.29,0.29,0.29,0.29,0.29],
+      "volumeHistory": [14200,13800,15100,14700,16000,15600,17100,16700,18300,17900,19600,19200,21100,20700,22700,22200,24400,23900,22900,24400,26200,25700,27600,27100,26100,27600,29300,28800,27700,29300],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-energy-002",
+      "title": "Will US natural gas Henry Hub prices exceed $4/MMBtu in April 2026?",
+      "probability": 0.63,
+      "volume": 412900,
+      "daysToResolution": 4,
+      "decayWeight": 0.98,
+      "historicalVolatility": 0.082,
+      "probHistory": [0.38,0.40,0.42,0.41,0.44,0.46,0.48,0.47,0.50,0.52,0.51,0.53,0.55,0.54,0.56,0.58,0.57,0.59,0.61,0.60,0.61,0.62,0.61,0.63,0.63,0.63,0.63,0.63,0.63,0.63],
+      "volumeHistory": [8700,8400,9100,8800,9600,9300,10200,9900,10900,10600,11700,11400,12500,12200,13400,13100,14400,14100,13500,14400,15500,15200,16400,16100,15400,16400,17700,17300,16600,17700],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-energy-003",
+      "title": "Will the US grid experience a major blackout affecting 1M+ customers in 2026?",
+      "probability": 0.22,
+      "volume": 234700,
+      "daysToResolution": 278,
+      "decayWeight": 0.34,
+      "historicalVolatility": 0.029,
+      "probHistory": [0.14,0.15,0.15,0.16,0.16,0.17,0.17,0.18,0.18,0.18,0.19,0.19,0.19,0.20,0.20,0.20,0.21,0.21,0.21,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22],
+      "volumeHistory": [3900,3700,4100,3900,4300,4100,4500,4300,4700,4500,5000,4800,5300,5100,5600,5400,5900,5700,5500,5900,6400,6200,6700,6500,6300,6700,7200,7000,6800,7200],
+      "source": "polymarket",
+      "isResolved": false
+    }
+  ],
+  "housing": [
+    {
+      "id": "poly-housing-001",
+      "title": "Will US 30-year fixed mortgage rate fall below 6% by July 2026?",
+      "probability": 0.31,
+      "volume": 523100,
+      "daysToResolution": 127,
+      "decayWeight": 0.63,
+      "historicalVolatility": 0.042,
+      "probHistory": [0.18,0.19,0.20,0.19,0.21,0.22,0.21,0.23,0.24,0.23,0.25,0.24,0.26,0.25,0.27,0.26,0.28,0.27,0.29,0.28,0.30,0.29,0.31,0.30,0.31,0.31,0.31,0.31,0.31,0.31],
+      "volumeHistory": [10800,10400,11300,10900,11900,11500,12600,12200,13400,13000,14300,13900,15400,15000,16600,16200,17900,17500,16700,17900,19400,19000,20600,20200,19400,20600,22100,21700,20900,22100],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-housing-002",
+      "title": "Will US existing home sales exceed 4.5M annualized in Q2 2026?",
+      "probability": 0.47,
+      "volume": 284600,
+      "daysToResolution": 95,
+      "decayWeight": 0.72,
+      "historicalVolatility": 0.038,
+      "probHistory": [0.31,0.32,0.33,0.32,0.34,0.35,0.34,0.36,0.37,0.36,0.38,0.39,0.38,0.40,0.41,0.40,0.42,0.43,0.42,0.44,0.45,0.44,0.46,0.45,0.47,0.46,0.47,0.47,0.47,0.47],
+      "volumeHistory": [5800,5600,6100,5900,6400,6200,6800,6600,7200,7000,7700,7500,8200,8000,8800,8600,9400,9200,8800,9400,10200,10000,10900,10700,10300,10900,11900,11700,11200,11900],
+      "source": "polymarket",
+      "isResolved": false
+    }
+  ],
+  "labor": [
+    {
+      "id": "poly-labor-001",
+      "title": "Will US unemployment rate exceed 4.5% in Q2 2026?",
+      "probability": 0.33,
+      "volume": 614200,
+      "daysToResolution": 95,
+      "decayWeight": 0.72,
+      "historicalVolatility": 0.044,
+      "probHistory": [0.19,0.20,0.21,0.20,0.22,0.23,0.22,0.24,0.25,0.24,0.26,0.27,0.26,0.28,0.29,0.28,0.30,0.29,0.31,0.30,0.31,0.32,0.31,0.33,0.33,0.33,0.33,0.33,0.33,0.33],
+      "volumeHistory": [12600,12200,13300,12900,14100,13700,15100,14700,16200,15800,17400,17000,18700,18200,20200,19700,21800,21300,20400,21800,23600,23100,25100,24600,23700,25100,27200,26700,25700,27200],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-labor-002",
+      "title": "Will US non-farm payrolls add fewer than 100K jobs in any month of Q2 2026?",
+      "probability": 0.41,
+      "volume": 387500,
+      "daysToResolution": 95,
+      "decayWeight": 0.72,
+      "historicalVolatility": 0.052,
+      "probHistory": [0.24,0.25,0.26,0.27,0.26,0.28,0.29,0.28,0.30,0.31,0.30,0.32,0.33,0.32,0.34,0.35,0.34,0.36,0.37,0.36,0.38,0.39,0.38,0.40,0.41,0.40,0.41,0.41,0.41,0.41],
+      "volumeHistory": [7900,7600,8300,8000,8700,8400,9200,8900,9700,9400,10300,10000,10900,10600,11600,11300,12400,12100,11600,12400,13400,13100,14100,13800,13300,14100,15200,14900,14300,15200],
+      "source": "polymarket",
+      "isResolved": false
+    },
+    {
+      "id": "poly-labor-003",
+      "title": "Will federal employees union file a major legal challenge to 2026 workforce reductions?",
+      "probability": 0.76,
+      "volume": 198300,
+      "daysToResolution": 22,
+      "decayWeight": 0.95,
+      "historicalVolatility": 0.058,
+      "probHistory": [0.44,0.46,0.48,0.50,0.52,0.54,0.53,0.56,0.57,0.59,0.60,0.62,0.61,0.63,0.65,0.64,0.66,0.67,0.69,0.68,0.70,0.71,0.73,0.72,0.74,0.75,0.74,0.76,0.76,0.76],
+      "volumeHistory": [4100,3900,4300,4700,4500,4900,4700,5200,5000,5500,5300,5900,5700,6300,6100,6700,6400,7100,7800,7500,8300,9100,8700,9600,10600,10200,11300,12400,12000,13200],
+      "source": "polymarket",
+      "isResolved": false
+    }
+  ]
+}
