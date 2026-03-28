@@ -1,140 +1,95 @@
-{
-  "food": [
-    {
-      "id": "kalshi-food-001",
-      "title": "Will the BLS CPI food-at-home index rise more than 0.4% month-over-month in March 2026?",
-      "probability": 0.67,
-      "volume": 318400,
-      "daysToResolution": 18,
-      "decayWeight": 0.96,
-      "historicalVolatility": 0.053,
-      "probHistory": [0.39,0.41,0.42,0.44,0.43,0.45,0.47,0.49,0.48,0.50,0.52,0.51,0.53,0.55,0.54,0.56,0.57,0.56,0.58,0.59,0.61,0.60,0.62,0.63,0.65,0.64,0.66,0.67,0.67,0.67],
-      "volumeHistory": [6500,6300,6800,7300,7100,7700,8300,8900,8600,9300,10100,9800,10600,11500,11200,12200,13200,12900,14000,15100,14800,16100,17400,17100,18600,20100,19700,21500,23300,22800],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-food-002",
-      "title": "Will a second wave of avian flu H5N1 be confirmed in US poultry flocks in Q2 2026?",
-      "probability": 0.74,
-      "volume": 441700,
-      "daysToResolution": 65,
-      "decayWeight": 0.78,
-      "historicalVolatility": 0.061,
-      "probHistory": [0.43,0.45,0.47,0.46,0.49,0.51,0.50,0.52,0.54,0.53,0.56,0.57,0.56,0.59,0.60,0.59,0.62,0.63,0.62,0.64,0.66,0.65,0.67,0.69,0.68,0.70,0.72,0.71,0.73,0.74],
-      "volumeHistory": [9100,8800,9600,9300,10200,9900,10900,10600,11700,11400,12600,12300,13600,13200,14700,14300,16000,15600,15000,16000,17400,17000,18600,18100,17400,18600,20300,19800,19000,20300],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-food-003",
-      "title": "Will US grocery store food price inflation exceed 5% YoY by Q3 2026?",
-      "probability": 0.38,
-      "volume": 187200,
-      "daysToResolution": 187,
-      "decayWeight": 0.48,
-      "historicalVolatility": 0.035,
-      "probHistory": [0.22,0.23,0.23,0.24,0.24,0.25,0.25,0.26,0.26,0.27,0.27,0.28,0.28,0.29,0.29,0.30,0.30,0.31,0.31,0.32,0.33,0.33,0.34,0.35,0.35,0.36,0.37,0.37,0.38,0.38],
-      "volumeHistory": [3800,3600,4000,3800,4200,4000,4400,4200,4700,4500,5000,4800,5300,5100,5700,5500,6100,5900,5600,6100,6700,6500,7200,7000,6700,7200,7900,7700,7400,7900],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-food-004",
-      "title": "Will the FDA issue a food recall affecting more than 10 states in Q2 2026?",
-      "probability": 0.55,
-      "volume": 142800,
-      "daysToResolution": 65,
-      "decayWeight": 0.78,
-      "historicalVolatility": 0.041,
-      "probHistory": [0.33,0.34,0.35,0.36,0.35,0.37,0.38,0.37,0.39,0.40,0.39,0.41,0.42,0.41,0.43,0.44,0.43,0.45,0.46,0.45,0.47,0.48,0.47,0.49,0.50,0.52,0.51,0.53,0.54,0.55],
-      "volumeHistory": [2900,2800,3100,3000,3300,3100,3500,3300,3700,3500,3900,3800,4200,4000,4500,4300,4800,4600,4400,4800,5300,5100,5700,5500,5300,5700,6300,6100,5800,6300],
-      "source": "kalshi",
-      "isResolved": false
-    }
-  ],
-  "energy": [
-    {
-      "id": "kalshi-energy-001",
-      "title": "Will US gasoline retail prices exceed $3.80/gallon national average by May 2026?",
-      "probability": 0.48,
-      "volume": 529800,
-      "daysToResolution": 34,
-      "decayWeight": 0.91,
-      "historicalVolatility": 0.066,
-      "probHistory": [0.28,0.30,0.32,0.31,0.33,0.35,0.34,0.36,0.38,0.37,0.39,0.41,0.40,0.42,0.43,0.42,0.44,0.45,0.44,0.46,0.47,0.46,0.47,0.48,0.47,0.48,0.48,0.48,0.48,0.48],
-      "volumeHistory": [10900,10500,11500,11100,12200,11800,13000,12600,13900,13500,15100,14700,16400,16000,17900,17500,19500,19100,18300,19500,21400,21000,23100,22700,21800,23100,25400,25000,24000,25400],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-energy-002",
-      "title": "Will OPEC+ announce a production cut exceeding 500K bpd in April 2026?",
-      "probability": 0.34,
-      "volume": 371200,
-      "daysToResolution": 4,
-      "decayWeight": 0.98,
-      "historicalVolatility": 0.078,
-      "probHistory": [0.19,0.20,0.22,0.21,0.23,0.24,0.26,0.25,0.27,0.29,0.28,0.30,0.29,0.31,0.30,0.32,0.31,0.33,0.32,0.34,0.33,0.34,0.33,0.35,0.34,0.34,0.34,0.34,0.34,0.34],
-      "volumeHistory": [7600,7300,8000,7700,8500,8200,9100,8800,9700,9400,10400,10100,11200,10900,12200,11900,13300,13000,12500,13300,14600,14300,15700,15400,14800,15700,17300,16900,16200,17300],
-      "source": "kalshi",
-      "isResolved": false
-    }
-  ],
-  "housing": [
-    {
-      "id": "kalshi-housing-001",
-      "title": "Will US median home sale price fall more than 3% YoY in any month of Q2 2026?",
-      "probability": 0.24,
-      "volume": 298400,
-      "daysToResolution": 95,
-      "decayWeight": 0.72,
-      "historicalVolatility": 0.036,
-      "probHistory": [0.13,0.14,0.14,0.15,0.15,0.16,0.16,0.17,0.17,0.18,0.18,0.19,0.19,0.20,0.20,0.21,0.21,0.22,0.22,0.23,0.23,0.23,0.24,0.24,0.24,0.24,0.24,0.24,0.24,0.24],
-      "volumeHistory": [6100,5900,6500,6300,6900,6700,7400,7200,8000,7800,8700,8500,9500,9300,10400,10200,11500,11300,10900,11500,12700,12500,13800,13500,13000,13800,15200,14900,14300,15200],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-housing-002",
-      "title": "Will the Fed cut interest rates at least once by July 2026?",
-      "probability": 0.69,
-      "volume": 842100,
-      "daysToResolution": 127,
-      "decayWeight": 0.63,
-      "historicalVolatility": 0.049,
-      "probHistory": [0.44,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.64,0.65,0.66,0.67,0.67,0.68,0.68,0.69,0.69,0.69],
-      "volumeHistory": [17300,16800,18400,17900,19600,19100,21100,20600,22800,22300,25000,24500,27200,26700,30000,29400,33000,32400,31100,33000,36500,35800,39700,38900,37500,39700,44000,43200,41600,44000],
-      "source": "kalshi",
-      "isResolved": false
-    }
-  ],
-  "labor": [
-    {
-      "id": "kalshi-labor-001",
-      "title": "Will US initial jobless claims exceed 250K in any week of April 2026?",
-      "probability": 0.44,
-      "volume": 276400,
-      "daysToResolution": 34,
-      "decayWeight": 0.91,
-      "historicalVolatility": 0.057,
-      "probHistory": [0.26,0.27,0.28,0.29,0.28,0.30,0.31,0.30,0.32,0.33,0.32,0.34,0.35,0.34,0.36,0.37,0.36,0.38,0.39,0.38,0.40,0.41,0.40,0.42,0.43,0.42,0.43,0.44,0.44,0.44],
-      "volumeHistory": [5700,5500,6000,5800,6400,6200,6800,6600,7300,7100,7900,7700,8600,8400,9400,9200,10300,10100,9700,10300,11400,11200,12400,12100,11700,12400,13700,13400,12900,13700],
-      "source": "kalshi",
-      "isResolved": false
-    },
-    {
-      "id": "kalshi-labor-002",
-      "title": "Will US private sector hiring (ADP) exceed 200K in April 2026?",
-      "probability": 0.39,
-      "volume": 198700,
-      "daysToResolution": 34,
-      "decayWeight": 0.91,
-      "historicalVolatility": 0.048,
-      "probHistory": [0.24,0.25,0.26,0.25,0.27,0.28,0.27,0.29,0.30,0.29,0.31,0.32,0.31,0.33,0.34,0.33,0.35,0.36,0.35,0.37,0.37,0.38,0.37,0.39,0.38,0.39,0.39,0.39,0.39,0.39],
-      "volumeHistory": [4100,3900,4300,4200,4600,4400,4900,4700,5200,5000,5600,5400,6100,5900,6700,6500,7400,7200,6900,7400,8200,8000,8900,8700,8300,8900,9900,9700,9300,9900],
-      "source": "kalshi",
-      "isResolved": false
-    }
-  ]
-}
+[
+  {
+    "id": "kalshi_KXBRENT-26APR119",
+    "title": "Brent crude oil above $119 on April 30, 2026",
+    "probability": 0.78,
+    "volume": 3140000,
+    "daysToResolution": 3,
+    "decayWeight": 1.0,
+    "historicalVolatility": 0.049,
+    "probHistory": [0.31,0.34,0.36,0.39,0.41,0.44,0.46,0.49,0.51,0.53,0.55,0.57,0.56,0.58,0.60,0.62,0.61,0.63,0.65,0.67,0.66,0.68,0.70,0.72,0.73,0.74,0.75,0.77,0.77,0.78],
+    "volumeHistory": [52000,50000,54000,58000,56000,61000,66000,71000,68000,74000,80000,86000,83000,89000,97000,105000,101000,109000,118000,113000,122000,132000,127000,137000,148000,143000,154000,166000,160000,173000],
+    "source": "kalshi",
+    "isResolved": false
+  },
+  {
+    "id": "kalshi_KXWTI-26APR115",
+    "title": "WTI crude oil above $115 on April 30, 2026",
+    "probability": 0.72,
+    "volume": 2480000,
+    "daysToResolution": 3,
+    "decayWeight": 1.0,
+    "historicalVolatility": 0.051,
+    "probHistory": [0.27,0.29,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.49,0.48,0.50,0.52,0.54,0.53,0.55,0.57,0.59,0.58,0.60,0.62,0.64,0.66,0.67,0.69,0.70,0.71,0.72],
+    "volumeHistory": [41000,40000,43000,46000,45000,48000,52000,56000,54000,58000,63000,68000,66000,71000,77000,83000,80000,86000,93000,90000,97000,105000,101000,109000,118000,113000,122000,132000,127000,137000],
+    "source": "kalshi",
+    "isResolved": false
+  },
+  {
+    "id": "kalshi_KXENERGY-USDECLARE-26",
+    "title": "Will the US declare a national energy emergency in 2026?",
+    "probability": 0.41,
+    "volume": 1870000,
+    "daysToResolution": 278,
+    "decayWeight": 0.10,
+    "historicalVolatility": 0.027,
+    "probHistory": [0.11,0.12,0.12,0.13,0.14,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.25,0.26,0.27,0.28,0.30,0.31,0.32,0.34,0.35,0.36,0.38,0.39,0.40,0.40,0.41],
+    "volumeHistory": [31000,30000,32000,35000,34000,36000,39000,42000,41000,44000,47000,51000,49000,53000,57000,62000,60000,64000,70000,67000,72000,78000,75000,81000,88000,84000,91000,98000,95000,102000],
+    "source": "kalshi",
+    "isResolved": false
+  },
+  {
+    "id": "kalshi_KXOIL-SPR-RELEASE-26",
+    "title": "Will the US authorize an emergency SPR release in 2026?",
+    "probability": 0.34,
+    "volume": 1420000,
+    "daysToResolution": 278,
+    "decayWeight": 0.10,
+    "historicalVolatility": 0.022,
+    "probHistory": [0.08,0.08,0.09,0.09,0.10,0.10,0.11,0.12,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34],
+    "volumeHistory": [24000,23000,25000,27000,26000,28000,30000,33000,31000,34000,36000,39000,38000,41000,44000,48000,46000,50000,54000,52000,56000,60000,58000,63000,68000,65000,71000,76000,73000,79000],
+    "source": "kalshi",
+    "isResolved": false
+  },
+  {
+    "id": "kalshi_KXGAS-RETAIL-26MAY380",
+    "title": "US average retail gasoline price above $3.80/gallon in May 2026",
+    "probability": 0.67,
+    "volume": 2210000,
+    "daysToResolution": 34,
+    "decayWeight": 1.0,
+    "historicalVolatility": 0.043,
+    "probHistory": [0.29,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.44,0.46,0.48,0.50,0.49,0.51,0.53,0.55,0.54,0.56,0.57,0.59,0.58,0.60,0.62,0.63,0.64,0.65,0.66,0.67,0.67],
+    "volumeHistory": [37000,35000,38000,41000,40000,43000,46000,50000,48000,52000,56000,61000,58000,63000,68000,73000,71000,76000,82000,79000,86000,92000,89000,96000,104000,100000,108000,117000,113000,122000],
+    "source": "kalshi",
+    "isResolved": false
+  },
+  {
+    "id": "kalshi_KXBRENT-22Q2-100",
+    "title": "Brent crude oil above $100 in Q2 2022",
+    "probability": 1.0,
+    "volume": 1180000,
+    "daysToResolution": 0,
+    "decayWeight": 0.85,
+    "historicalVolatility": 0.038,
+    "probHistory": [0.58,0.62,0.65,0.68,0.71,0.74,0.77,0.80,0.82,0.84,0.86,0.88,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.98,0.99,0.99,1.0,1.0,1.0,1.0,1.0,1.0],
+    "volumeHistory": [20000,19000,20000,22000,21000,23000,24000,26000,25000,27000,29000,32000,31000,33000,36000,39000,37000,40000,44000,42000,45000,49000,47000,51000,55000,53000,57000,62000,59000,64000],
+    "source": "kalshi",
+    "isResolved": true,
+    "outcome": "yes"
+  },
+  {
+    "id": "kalshi_KXOIL-IRAN-TANKERS-2019",
+    "title": "Will Iran seize additional oil tankers in the Strait of Hormuz before Dec 2019?",
+    "probability": 1.0,
+    "volume": 890000,
+    "daysToResolution": 0,
+    "decayWeight": 0.85,
+    "historicalVolatility": 0.029,
+    "probHistory": [0.41,0.44,0.47,0.50,0.53,0.56,0.59,0.62,0.65,0.68,0.71,0.73,0.75,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.93,0.95,0.96,0.97,0.98,0.99,0.99,1.0,1.0],
+    "volumeHistory": [15000,14000,15000,17000,16000,17000,19000,20000,19000,21000,23000,24000,23000,25000,27000,29000,28000,30000,33000,31000,34000,37000,35000,38000,41000,40000,43000,46000,45000,48000],
+    "source": "kalshi",
+    "isResolved": true,
+    "outcome": "yes"
+  }
+]
