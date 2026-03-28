@@ -1,4 +1,5 @@
 import { differenceInDays, parseISO } from 'date-fns';
+import { kalshiHeaders } from '../kalshiAuth.js';
 import type { EnrichedMarket } from '../types.js';
 
 // Iran/oil domain keywords — targeted fetch, no noise
@@ -83,9 +84,10 @@ async function fetchKalshiActive(): Promise<EnrichedMarket[]> {
 
   for (const series of KALSHI_ENERGY_SERIES) {
     try {
+      const path = `/trade-api/v2/markets?series_ticker=${series}&status=open`;
       const res = await fetch(
         `${process.env.KALSHI_API_BASE}/markets?series_ticker=${series}&status=open`,
-        { headers: { Authorization: `Bearer ${process.env.KALSHI_API_KEY}` } }
+        { headers: kalshiHeaders('GET', path) }
       );
       if (!res.ok) continue;
       const data = await res.json() as { markets: any[] };
@@ -107,9 +109,10 @@ async function fetchKalshiHistorical(): Promise<EnrichedMarket[]> {
 
   for (const series of KALSHI_ENERGY_SERIES) {
     try {
+      const path = `/trade-api/v2/historical/markets?series_ticker=${series}`;
       const res = await fetch(
         `${process.env.KALSHI_API_BASE}/historical/markets?series_ticker=${series}`,
-        { headers: { Authorization: `Bearer ${process.env.KALSHI_API_KEY}` } }
+        { headers: kalshiHeaders('GET', path) }
       );
       if (!res.ok) continue;
       const data = await res.json() as { markets: any[] };
@@ -140,8 +143,11 @@ async function enrichKalshi(m: any, series: string, isHistorical: boolean): Prom
       ? `${process.env.KALSHI_API_BASE}/historical/markets/${m.ticker}/candlesticks?period_interval=1440`
       : `${process.env.KALSHI_API_BASE}/series/${series}/markets/${m.ticker}/candlesticks?period_interval=1440`;
 
+    const candlePath = isHistorical
+      ? `/trade-api/v2/historical/markets/${m.ticker}/candlesticks?period_interval=1440`
+      : `/trade-api/v2/series/${series}/markets/${m.ticker}/candlesticks?period_interval=1440`;
     const hist = await fetch(endpoint, {
-      headers: { Authorization: `Bearer ${process.env.KALSHI_API_KEY}` }
+      headers: kalshiHeaders('GET', candlePath),
     });
 
     if (hist.ok) {
