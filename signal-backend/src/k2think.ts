@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const client = new OpenAI({
-  apiKey: process.env.K2_API_KEY,
-  baseURL: process.env.K2_BASE_URL ?? 'https://api.k2think.ai/v1',
+  apiKey: process.env.K2_THINK_API_KEY,
+  baseURL: process.env.K2_THINK_BASE_URL ?? 'https://api.k2think.ai/v1',
 });
 
 const MODEL = process.env.K2_MODEL ?? 'MBZUAI-IFM/K2-Think-v2';
