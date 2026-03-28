@@ -1,10 +1,15 @@
-import { fetchAndEnrich, loadSnapshot }               from '../agents/marketFetcher.js';
+import { fetchAndEnrich, loadSnapshot }                   from '../agents/marketFetcher.js';
 import { screenMarkets, buildLagMatrix, validateCluster } from '../agents/statisticalScreener.js';
-import { findPrecedents }                                from '../agents/historicalPrecedent.js';
-import { callK2Think, callK2ThinkStream, parseK2Json }   from '../k2think.js';
+import { findPrecedents }                                  from '../agents/historicalPrecedent.js';
+import { getStakeholders }                                 from '../agents/stakeholder.js';
+import { callK2Think, callK2ThinkStream, parseK2Json }     from '../k2think.js';
+import { getDomain }                                       from '../domains.js';
+import type { DomainConfig }                               from '../domains.js';
+import { generateReport }                                   from '../pipeline/report.js';
 import type {
   PipelineEvent, PipelineResult, ScreenedMarket,
   ClusterSelectionResult, CausalAnalysis, OrchestrationAudit,
+  MathAnalysis, ActionDirective,
 } from '../types.js';
 
 const MAX_STAT_RETRIES   = 3;
@@ -12,8 +17,10 @@ const MAX_CAUSAL_RETRIES = 2;
 
 export async function runPipeline(
   emit: (e: PipelineEvent) => void,
+  domainId = 'iran-oil',
   useCached = false,
 ): Promise<PipelineResult> {
+  const domain: DomainConfig = getDomain(domainId);
 
   const audit: OrchestrationAudit = {
     agentsCalledInOrder: [], agentTrustDecisions: [],
@@ -59,7 +66,8 @@ export async function runPipeline(
 
     const selRaw = await callK2Think(`
 You are orchestrating a multi-agent prediction market analysis system.
-Domain: Iran/oil crisis — Strait of Hormuz disruption and downstream oil price effects.
+Domain: ${domain.name}
+Context: ${domain.context}
 
 Statistical Screener returned ${screened.length} pre-screened markets (vwScore>0.15, 14+ days history).
 Sources: Polymarket + Kalshi. Includes both active and resolved markets.
@@ -74,8 +82,8 @@ ${JSON.stringify(screened.filter(m => !excludeIds.includes(m.id)).map(m => ({
 LAG STRUCTURE: ${lagMatrix.propagationSummary}
 ${excludeIds.length > 0 ? `EXCLUDED (failed validation): ${JSON.stringify(excludeIds)}` : ''}
 
-Select ALL markets that share a causal mechanism in the Iran/oil chain:
-Hormuz closure → crude spike → gasoline → energy emergency → SPR release.
+Select ALL markets that share a causal mechanism in this chain:
+${domain.causalChainDescription}
 No cap on cluster size — include every market passing r >= 0.50.
 Rank by causal importance using lag structure (leading markets first).
 Flag uncertain markets as provisional.
@@ -124,8 +132,8 @@ Return ONLY valid JSON:
   // ── Step 4: Historical precedents ────────────────────────────────────────
   emit({ step: 'precedent', status: 'running', agentName: 'HistoricalPrecedentAgent' });
   audit.agentsCalledInOrder.push('HistoricalPrecedentAgent');
-  const keywords  = cluster.flatMap(m => m.title.toLowerCase().split(/\s+/)).filter(w => w.length > 3);
-  const precedents = findPrecedents(keywords);
+  const keywords   = cluster.flatMap(m => m.title.toLowerCase().split(/\s+/)).filter(w => w.length > 3);
+  const precedents = await findPrecedents(domain, keywords);
   emit({ step: 'precedent', status: 'complete', data: precedents });
 
   // ── Step 6: K2 Think V2 — causal reasoning loop ───────────────────────────
@@ -143,7 +151,7 @@ Return ONLY valid JSON:
 
     const causalTokens: string[] = [];
     const causalRaw = await callK2ThinkStream(`
-You are the orchestrator reasoning about causal structure for the Iran/oil crisis domain.
+You are the orchestrator reasoning about causal structure for the ${domain.name} domain.
 ${prevRejections.length ? `PREVIOUS REJECTIONS:\n${prevRejections.join('\n')}` : ''}
 
 CLUSTER:
@@ -159,8 +167,8 @@ LAG STRUCTURE: ${lagMatrix.propagationSummary}
 HISTORICAL PRECEDENTS:
 ${precedents.cases.map(p => `- ${p.description}: ${p.relevantLesson} (${p.analogyStrength})`).join('\n')}
 
-Context: Iran/Strait of Hormuz oil crisis. Brent crude ~$110-120/barrel.
-Causal chain to reason about: Hormuz closure risk → crude spike → gasoline → energy emergency → SPR.
+Context: ${domain.context}
+Causal chain to reason about: ${domain.causalChainDescription}
 
 1. CAUSAL MECHANISM: specific chain using the lag values as hard constraints
 2. PARTIAL REJECTION: any markets that don't fit — list with specific reasons
@@ -221,14 +229,127 @@ Return ONLY valid JSON:
     });
   }
 
-  // ── Steps 7–10: Math, Action, Audit, Report ───────────────────────────────
-  // TODO: implemented by teammates — stubs for now
-  emit({ step: 'done', status: 'complete', data: { status: 'confirmed', causal } });
+  // ── Step 7: Stakeholders ──────────────────────────────────────────────────
+  audit.agentsCalledInOrder.push('StakeholderAgent');
+  const stakeholders = await getStakeholders(domain, causal.causalMechanism);
+
+  // ── Step 8: Math analysis (streaming) ────────────────────────────────────
+  emit({ step: 'math', status: 'running', agentName: 'K2ThinkV2-MathReasoning' });
+  audit.agentsCalledInOrder.push('K2ThinkV2-MathReasoning');
+  const mathTokens: string[] = [];
+  const mathRaw = await callK2ThinkStream(`
+Advanced mathematical analysis on confirmed prediction market signal.
+Show all derivations step by step.
+
+CLUSTER: ${JSON.stringify(cluster.map(m => ({
+  id: m.id, title: m.title, probability: m.probability,
+  daysToResolution: m.daysToResolution, decayWeight: m.decayWeight,
+  vwScore: m.vwScore, historicalVolatility: m.historicalVolatility,
+  probHistory: m.probHistory,
+})), null, 2)}
+
+LAG MATRIX: ${lagMatrix.propagationSummary}
+Avg best-lag r: ${lagMatrix.avgBestR.toFixed(3)}
+Causal chain: ${causal.propagationChain}
+
+1. CORRELATION DECAY: discount r by daysToResolution + historicalVolatility
+2. JOINT POSTERIOR: Bayesian, account for shared information — do NOT average
+3. 80% CI from historicalVolatility
+4. DERIVED DECAY WEIGHTS: weight_i = base_decay × (1 - σ_i/σ_max) × vwScore_i
+5. EFFECTIVE ACTION WINDOW: leading market daysToResolution minus propagation lag
+
+Return ONLY valid JSON:
+{
+  "correlationDecayAssessment":"...","adjustedCorrelationConfidence":0.0,
+  "jointPosteriorProbability":0.0,"jointPosteriorReasoning":"...",
+  "confidenceIntervalLow":0.0,"confidenceIntervalHigh":0.0,"confidenceIntervalReasoning":"...",
+  "derivedDecayWeights":{},"decayDerivationReasoning":"...",
+  "mathSignalStrength":0,"effectiveActionWindowDays":0
+}
+`.trim(), 'high', token => {
+    mathTokens.push(token);
+    emit({ step: 'math', status: 'streaming', data: { partial: mathTokens.join('') } });
+  });
+  const math = parseK2Json<MathAnalysis>(mathRaw);
+  emit({ step: 'math', status: 'complete', data: math });
+
+  // ── Step 9: Action directive ──────────────────────────────────────────────
+  emit({ step: 'action', status: 'running', agentName: 'K2ThinkV2-ActionDirective' });
+  audit.agentsCalledInOrder.push('K2ThinkV2-ActionDirective');
+  const actionRaw = await callK2Think(`
+Generate an operationally specific action directive.
+
+Domain: ${domain.name}
+Causal mechanism: ${causal.causalMechanism}
+Joint posterior: ${Math.round(math.jointPosteriorProbability * 100)}%
+80% CI: [${Math.round(math.confidenceIntervalLow * 100)}%, ${Math.round(math.confidenceIntervalHigh * 100)}%]
+Effective action window: ${math.effectiveActionWindowDays} days
+
+STAKEHOLDER CONTEXT:
+${JSON.stringify(stakeholders, null, 2)}
+
+Rules:
+- Name the EXACT legal mechanism the actor must invoke
+- Reference the EFFECTIVE ACTION WINDOW as the hard deadline
+- Reference the CONFIDENCE INTERVAL in the reasoning
+- Be specific — name the office, the statute, the timeline
+- BAD: "DOE should consider options" GOOD: "DOE Office of Petroleum Reserves should seek presidential authorization under EPCA 42 USC 6241 within ${math.effectiveActionWindowDays} days"
+
+Return ONLY valid JSON:
+{
+  "actor":"...","specificRole":"...","action":"...","legalMechanism":"...",
+  "geography":"...","timeWindow":"...","effectiveWindowDays":${math.effectiveActionWindowDays},
+  "reasoning":"...","confidenceScore":${causal.confidenceScore},
+  "confidenceIntervalLow":${math.confidenceIntervalLow},
+  "confidenceIntervalHigh":${math.confidenceIntervalHigh},
+  "jointPosteriorProbability":${math.jointPosteriorProbability},
+  "avgDecayWeight":${cluster.reduce((s, m) => s + m.decayWeight, 0) / cluster.length},
+  "urgency":"immediate|urgent|planned"
+}
+`.trim(), 'medium');
+  const directive = parseK2Json<ActionDirective>(actionRaw);
+  emit({ step: 'action', status: 'complete', data: directive });
+
+  // ── Step 10: Meta-reasoning audit ─────────────────────────────────────────
+  emit({ step: 'audit', status: 'running', agentName: 'K2ThinkV2-MetaReasoning' });
+  audit.agentsCalledInOrder.push('K2ThinkV2-MetaReasoning');
+  const auditRaw = await callK2Think(`
+Audit your own orchestration process for this pipeline run.
+
+Agents called: ${audit.agentsCalledInOrder.join(' → ')}
+Final directive: ${directive.actor} should ${directive.action}
+Confidence: ${directive.confidenceScore}/100
+
+1. Which agent outputs did you rely on most heavily?
+2. If those agents were wrong, how wrong is the directive?
+3. What agent should you have called but didn't?
+4. What information would change this directive?
+
+Return ONLY valid JSON:
+{
+  "agentsCalledInOrder":${JSON.stringify(audit.agentsCalledInOrder)},
+  "agentTrustDecisions":[],"unexpectedFindings":[],"gapsIdentified":[],
+  "gapsFilled":[],"gapsUnfilled":[],"orchestrationConfidence":0,"wouldChangeWith":[]
+}
+`.trim(), 'medium');
+  const finalAudit = parseK2Json<OrchestrationAudit>(auditRaw);
+  emit({ step: 'audit', status: 'complete', data: finalAudit });
+
+  // ── Step 11: Report ───────────────────────────────────────────────────────
+  emit({ step: 'report', status: 'running', agentName: 'K2ThinkV2-ReportWriter' });
+  audit.agentsCalledInOrder.push('K2ThinkV2-ReportWriter');
+  const report = await generateReport({
+    selectedCluster: cluster, lagMatrix,
+    mathAnalysis: math, causalAnalysis: causal, directive, stakeholders,
+  });
+  emit({ step: 'report', status: 'complete', data: report });
+
+  emit({ step: 'done', status: 'complete', data: { status: 'confirmed' } });
   return buildResult({
     markets, screened, lagMatrix, cluster, rejectedClusters,
-    validation, causal, math: null, directive: null,
-    audit, report: null, statRetry, causalRetry,
-    status: 'confirmed', statusReason: 'Causal signal confirmed — downstream steps pending',
+    validation, causal, math, directive, audit: finalAudit, report,
+    statRetry, causalRetry, status: 'confirmed',
+    statusReason: 'Signal confirmed with causal mechanism and operational directive.',
   });
 }
 
