@@ -1,6 +1,5 @@
 import { fetchAndEnrich, loadSnapshot }               from '../agents/marketFetcher.js';
 import { screenMarkets, buildLagMatrix, validateCluster } from '../agents/statisticalScreener.js';
-import { detectContradictions }                          from '../agents/contradictionDetector.js';
 import { findPrecedents }                                from '../agents/historicalPrecedent.js';
 import { callK2Think, callK2ThinkStream, parseK2Json }   from '../k2think.js';
 import type {
@@ -122,18 +121,7 @@ Return ONLY valid JSON:
     }
   }
 
-  // ── Step 4: Contradiction check ───────────────────────────────────────────
-  emit({ step: 'contradiction', status: 'running', agentName: 'ContradictionDetectorAgent' });
-  audit.agentsCalledInOrder.push('ContradictionDetectorAgent');
-  const claims = cluster.map(m =>
-    `Market "${m.title}" probability ${m.probability.toFixed(2)}, ${m.regime} regime`
-  );
-  const contradictions = detectContradictions(claims);
-  if (contradictions.hasContradiction)
-    audit.unexpectedFindings.push(`${contradictions.contradictions.length} contradiction(s) found`);
-  emit({ step: 'contradiction', status: 'complete', data: contradictions });
-
-  // ── Step 5: Historical precedents ─────────────────────────────────────────
+  // ── Step 4: Historical precedents ────────────────────────────────────────
   emit({ step: 'precedent', status: 'running', agentName: 'HistoricalPrecedentAgent' });
   audit.agentsCalledInOrder.push('HistoricalPrecedentAgent');
   const keywords  = cluster.flatMap(m => m.title.toLowerCase().split(/\s+/)).filter(w => w.length > 3);
@@ -167,10 +155,6 @@ ${JSON.stringify(cluster.map(m => ({
 })), null, 2)}
 
 LAG STRUCTURE: ${lagMatrix.propagationSummary}
-
-CONTRADICTION CHECK: ${contradictions.hasContradiction
-  ? contradictions.contradictions.map(c => `CONFLICT: ${c.claimA} vs ${c.claimB}`).join('\n')
-  : 'None detected'}
 
 HISTORICAL PRECEDENTS:
 ${precedents.cases.map(p => `- ${p.description}: ${p.relevantLesson} (${p.analogyStrength})`).join('\n')}
