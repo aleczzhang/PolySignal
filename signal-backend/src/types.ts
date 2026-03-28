@@ -171,7 +171,7 @@ export interface ReportContent {
 }
 
 export interface PipelineEvent {
-  step: 'fetch' | 'screen' | 'cluster' | 'contradiction' | 'precedent'
+  step: 'fetch' | 'screen' | 'cluster' | 'precedent'
       | 'causal' | 'math' | 'action' | 'audit' | 'report' | 'done' | 'error';
   status: 'running' | 'streaming' | 'complete' | 'failed' | 'retry'
         | 'investigating' | 'ambiguous';
