@@ -47,10 +47,11 @@ async function enrichPolymarket(m: any): Promise<EnrichedMarket> {
   let probHistory: number[]   = [];
   let volumeHistory: number[] = [];
   try {
-    // Resolved markets: use fidelity=720 (12h) — finer granularity returns empty for resolved
+    // CLOB uses clobTokenIds[0] (YES outcome token) — not the market's condition ID
+    const tokenId  = m.clobTokenIds?.[0] ?? m.id;
     const fidelity = isResolved ? 720 : 1440;
     const hist = await fetch(
-      `${process.env.POLYMARKET_CLOB_BASE}/prices-history?market=${m.id}&interval=max&fidelity=${fidelity}`
+      `${process.env.POLYMARKET_CLOB_BASE}/prices-history?market=${tokenId}&interval=max&fidelity=${fidelity}`
     );
     if (hist.ok) {
       const data = await hist.json() as { history: { t: number; p: number }[] };
