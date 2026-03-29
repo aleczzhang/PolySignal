@@ -23,9 +23,11 @@ app.get('/api/domains', async () => listDomains());
 // The frontend connects via EventSource and receives each step as it completes.
 
 app.get('/api/pipeline', async (req, reply) => {
-  const { domain = 'iran-oil', cached = 'false' } = req.query as {
+  const { domain = 'iran-oil', cached = 'false', role = '', org = '' } = req.query as {
     domain?: string;
     cached?: string;
+    role?: string;
+    org?: string;
   };
   const useCached = cached === 'true';
 
@@ -43,16 +45,23 @@ app.get('/api/pipeline', async (req, reply) => {
     reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
   }
 
+  // Heartbeat — send a comment line every 20s to prevent proxy/browser timeout
+  const heartbeat = setInterval(() => {
+    reply.raw.write(': heartbeat\n\n');
+  }, 20_000);
+
   // Close stream if client disconnects early
   req.raw.on('close', () => {
+    clearInterval(heartbeat);
     reply.raw.end();
   });
 
   try {
-    await runPipeline(emit, domain, useCached);
+    await runPipeline(emit, domain, useCached, role, org);
   } catch (err: any) {
     emit({ step: 'error', status: 'failed', message: err?.message ?? 'Unknown error' });
   } finally {
+    clearInterval(heartbeat);
     reply.raw.end();
   }
 });
