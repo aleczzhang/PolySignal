@@ -12,6 +12,12 @@ export interface EnrichedMarket {
   volumeHistory: number[];
 }
 
+// Backend-compatible scored market (extends EnrichedMarket with composite score)
+export interface ScoredMarket extends EnrichedMarket {
+  score: number;   // 0-1 composite signal strength
+}
+
+// Legacy type kept for backward compat with old pipeline architecture
 export interface ScreenedMarket extends EnrichedMarket {
   vwScore: number;
   regime: 'stable' | 'transitioning' | 'stressed' | 'insufficient_data';
@@ -114,16 +120,19 @@ export interface PipelineState {
 
 export interface PipelineFullResult {
   status: string;
-  cluster?: ScreenedMarket[];
-  rejectedClusters?: { markets: ScreenedMarket[]; reason: string; avgR: number }[];
+  // Backend-current fields
+  selectedMarkets?: ScoredMarket[];
   causalAnalysis?: CausalAnalysis;
-  mathAnalysis?: MathAnalysis;
   actionDirective?: ActionDirective;
-  audit?: OrchestrationAudit;
   report?: {
     title: string; executiveSummary: string;
     causalReasoningProse: string; generatedAt: string;
   };
+  // Legacy fields (kept for backward compat, may be undefined)
+  cluster?: ScreenedMarket[];
+  rejectedClusters?: { markets: ScreenedMarket[]; reason: string; avgR: number }[];
+  mathAnalysis?: MathAnalysis;
+  audit?: OrchestrationAudit;
   [key: string]: unknown;
 }
 

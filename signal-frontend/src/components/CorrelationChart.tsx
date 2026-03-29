@@ -1,6 +1,11 @@
 import { useRef, useEffect } from 'react';
-import type { ScreenedMarket } from '../types';
 import type { DomainId } from '../types';
+
+// Minimal market shape — accepts both ScoredMarket and ScreenedMarket
+interface MarketSlim {
+  title: string;
+  probHistory: number[];
+}
 
 interface MarketLine {
   title: string;
@@ -10,8 +15,8 @@ interface MarketLine {
 }
 
 interface Props {
-  confirmedMarkets: ScreenedMarket[];
-  rejectedMarkets:  ScreenedMarket[];
+  confirmedMarkets: MarketSlim[];
+  rejectedMarkets?: MarketSlim[];
   domain?: DomainId;
 }
 
@@ -184,7 +189,7 @@ function drawChart(canvas: HTMLCanvasElement, lines: MarketLine[], frame: number
   }
 }
 
-export function CorrelationChart({ confirmedMarkets, rejectedMarkets, domain }: Props) {
+export function CorrelationChart({ confirmedMarkets, rejectedMarkets = [], domain }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef  = useRef(0);
   const rafRef    = useRef<number>(0);

@@ -16,8 +16,8 @@ export default function App() {
   const [retryCount, setRetryCount] = useState(0)
 
   const running  = state.running
-  const done     = state.finalStatus === 'confirmed'
-  const finished = !state.running && state.finalStatus !== null
+  const done     = state.finalStatus !== null          // any terminal status counts as done
+  const finished = !state.running && (state.finalStatus !== null || state.error !== null)
 
   // Reset retry count when domain changes or pipeline is restarted manually
   function handleDomainChange(id: DomainId) {
@@ -32,8 +32,14 @@ export default function App() {
   }, [running])
 
   // Auto-retry on low_confidence (up to 2 times), then navigate to Tab 3
+  // Also navigate on error so the user sees the results tab with whatever was produced
   useEffect(() => {
     if (!finished) return
+    if (state.error) {
+      // Pipeline errored — go to results tab to show whatever was fetched
+      const t = setTimeout(() => setTab(3), 700)
+      return () => clearTimeout(t)
+    }
     if (state.finalStatus === 'low_confidence' && retryCount < 2 && domain) {
       const t = setTimeout(() => {
         setRetryCount(c => c + 1)
@@ -44,7 +50,7 @@ export default function App() {
     const t = setTimeout(() => setTab(3), 700)
     return () => clearTimeout(t)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, state.finalStatus])
+  }, [finished, state.finalStatus, state.error])
 
   return (
     <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh' }}>
@@ -65,10 +71,6 @@ export default function App() {
             onRoleChange={setRole}
             onOrgChange={setOrg}
             onDomainChange={handleDomainChange}
-            markets={domain ? mockMarkets(domain) : []}
-            running={running}
-            done={done}
-            result={state.fullResult}
             onRun={() => domain && run(domain, false, role, org)}
           />
         </div>
@@ -91,8 +93,8 @@ export default function App() {
             org={org}
             result={state.fullResult}
             finalStatus={state.finalStatus}
-            rejectedMarkets={(state.fullResult?.rejectedClusters ?? state.rejectedClusters).flatMap((c: { markets: ScreenedMarket[] }) => c.markets)}
-            confirmedMarkets={state.fullResult?.cluster ?? []}
+            rejectedMarkets={[]}
+            confirmedMarkets={state.fullResult?.selectedMarkets ?? state.fullResult?.cluster ?? []}
           />
         </div>
       </main>
@@ -338,8 +340,8 @@ function Tab3Results({
   role: string; org: string
   result: PipelineFullResult | null
   finalStatus: PipelineState['finalStatus']
-  confirmedMarkets: ScreenedMarket[]
-  rejectedMarkets:  ScreenedMarket[]
+  confirmedMarkets: { title: string; probHistory: number[] }[]
+  rejectedMarkets:  { title: string; probHistory: number[] }[]
 }) {
   const statusBanner = finalStatus && finalStatus !== 'confirmed' ? STATUS_BANNERS[finalStatus] : null
 
