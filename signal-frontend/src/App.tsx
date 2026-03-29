@@ -219,13 +219,13 @@ function Tab2Analysis({ state, done, finished, retryCount }: { state: PipelineSt
                 <AgentPill key={cfg.agentKey} config={cfg} agentState={agents[cfg.agentKey]} />
               ))}
             </div>
-            <div className="ps-connector" />
-            {/* Row 2: directive → report run sequentially after row 1 */}
-            <div className="ps-parallel-cards">
-              {K2_SEQUENTIAL_PILLS.map(cfg => (
-                <AgentPill key={cfg.agentKey} config={cfg} agentState={agents[cfg.agentKey]} />
-              ))}
-            </div>
+            {/* Both converge → directive → report (sequential, full-width) */}
+            {K2_SEQUENTIAL_PILLS.map(cfg => (
+              <div key={cfg.agentKey} className="ps-stage-wrap">
+                <div className="ps-connector" />
+                <AgentPill config={cfg} agentState={agents[cfg.agentKey]} />
+              </div>
+            ))}
           </div>
 
           {state.error && (

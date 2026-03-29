@@ -3,7 +3,6 @@ import type { DomainConfig } from '../domains.js';
 
 export interface SearchStrategy {
   kalshiSeries: string[];  // Kalshi series tickers to query
-  minVolume:    number;    // drop markets below this USD volume
 }
 
 export async function generateSearchStrategy(
@@ -11,7 +10,7 @@ export async function generateSearchStrategy(
   opts: { broader?: boolean } = {},
 ): Promise<SearchStrategy> {
   const broaderNote = opts.broader
-    ? `\nIMPORTANT: The initial search returned too few markets. Return MORE series tickers (aim for 6-10) and lower the minVolume threshold to 10000 to cast a wider net.`
+    ? `\nIMPORTANT: The initial search returned too few markets. Return MORE series tickers (aim for 6-10) to cast a wider net.`
     : '';
 
   const raw = await callK2Think(`
@@ -21,25 +20,32 @@ Domain: ${domain.name}
 Context: ${domain.context}
 Causal chain: ${domain.causalChainDescription}
 
-Kalshi organizes markets by series tickers (e.g. KXWTI = WTI crude oil, KXBRENT = Brent crude,
-KXOIL = oil price, KXGAS = natural gas, KXENERGY = energy markets, KXIRAN = Iran-related,
-KXELECTION = US elections, KXFED = Federal Reserve, KXBTC = Bitcoin, KXETH = Ethereum).
+Kalshi organizes markets by series tickers. ONLY use series from this verified list:
+- Energy:          KXWTI, KXBRENT, KXGAS
+- Monetary policy: KXFED, KXINFLATION, KXCPI
+- US elections:    KXELECTION, KXPOTUS, KXSENATE, KXHOUSE
+- Crypto:          KXBTC, KXETH
+- Metals:          KXGOLD, KXSILVER
+- Equity indices:  KXSPX, KXNASDAQ
+- Geopolitical:    KXIRAN, KXCHINA, KXRUSSIA, KXUKRAINE
+- Economic:        KXJOBS, KXGDP
 
-Return the series tickers most relevant to this domain, and a minimum volume threshold (in USD)
-to filter out noise. Use 50000 for major geopolitical/commodity events.${broaderNote}
+IMPORTANT: Do NOT invent series tickers. Only use tickers from the list above.
+Return 2–4 series most directly relevant to this domain.${broaderNote}
 
 Return ONLY valid JSON:
 {
-  "kalshiSeries": ["KXWTI", "KXBRENT"],
-  "minVolume": 50000
+  "kalshiSeries": ["KXWTI", "KXBRENT"]
 }
 `.trim(), 'low');
 
   try {
-    return parseK2Json<SearchStrategy>(raw);
+    const strategy = parseK2Json<SearchStrategy>(raw);
+    console.log(`[Strategy] Kalshi series chosen: ${strategy.kalshiSeries.join(', ')}`);
+    return strategy;
   } catch {
     return opts.broader
-      ? { kalshiSeries: ['KXWTI', 'KXBRENT', 'KXOIL', 'KXGAS', 'KXENERGY', 'KXELECTION', 'KXFED', 'KXBTC', 'KXETH'], minVolume: 10000 }
-      : { kalshiSeries: ['KXWTI', 'KXBRENT', 'KXOIL', 'KXGAS', 'KXENERGY'], minVolume: 50000 };
+      ? { kalshiSeries: ['KXWTI', 'KXBRENT', 'KXOIL', 'KXGAS', 'KXENERGY', 'KXELECTION', 'KXFED', 'KXBTC', 'KXETH'] }
+      : { kalshiSeries: ['KXWTI', 'KXBRENT', 'KXOIL', 'KXGAS', 'KXENERGY'] };
   }
 }
