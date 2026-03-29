@@ -1,4 +1,5 @@
 import { fetchAndEnrich, loadSnapshot }                   from '../agents/marketFetcher.js';
+import { generateSearchStrategy }                          from '../agents/searchStrategy.js';
 import { screenMarkets, buildLagMatrix, validateCluster } from '../agents/statisticalScreener.js';
 import { findPrecedents }                                  from '../agents/historicalPrecedent.js';
 import { getStakeholders }                                 from '../agents/stakeholder.js';
@@ -28,10 +29,13 @@ export async function runPipeline(
     gapsUnfilled: [], orchestrationConfidence: 0, wouldChangeWith: [],
   };
 
+  // ── Step 0: Search strategy ───────────────────────────────────────────────
+  const strategy = await generateSearchStrategy(domain);
+
   // ── Step 1: Market Fetcher ────────────────────────────────────────────────
   emit({ step: 'fetch', status: 'running', agentName: 'MarketFetcherAgent' });
   audit.agentsCalledInOrder.push('MarketFetcherAgent');
-  const markets = useCached ? await loadSnapshot() : await fetchAndEnrich();
+  const markets = useCached ? await loadSnapshot() : await fetchAndEnrich(strategy, domain);
   emit({ step: 'fetch', status: 'complete', data: { count: markets.length } });
 
   // ── Step 2: Statistical Screener ──────────────────────────────────────────
