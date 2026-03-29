@@ -163,8 +163,9 @@ async function fetchPolymarket(
   const keptCount = relevance.relevantIds.length + relevance.historicalIds.length;
   console.log(`[Polymarket] K2 kept ${keptCount} events: ${relevance.reasoning}`);
 
-  const keptIds   = new Set([...relevance.relevantIds, ...relevance.historicalIds]);
-  const keptEvents = allCandidates.filter(e => keptIds.has(e.id));
+  // K2 may return IDs as numbers or strings — normalise both sides to string
+  const keptIds   = new Set([...relevance.relevantIds, ...relevance.historicalIds].map(String));
+  const keptEvents = allCandidates.filter(e => keptIds.has(String(e.id)));
 
   // Stage 3 — fetch price history only for approved markets
   const markets = keptEvents.flatMap(e => e.markets);
