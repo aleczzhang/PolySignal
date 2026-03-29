@@ -3,6 +3,7 @@ import { Sidebar, type TabId } from './components/Sidebar'
 import { usePipeline } from './hooks/usePipeline'
 import type { DomainId } from './types'
 import { SignalField } from './components/SignalField'
+import { useDomainSuggestions } from './hooks/useDomainSuggestions'
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -12,8 +13,17 @@ export default function App() {
   const [role, setRole]     = useState('')
   const [org,  setOrg]      = useState('')
 
-  const { state, run, reset } = usePipeline()
+  const { state, run, reset, runDemo } = usePipeline()
   const [retryCount, setRetryCount] = useState(0)
+  const { suggestions: liveSuggestions } = useDomainSuggestions(role, org)
+
+  const demoActive = isUberDriverDemo(role, org)
+  const suggestions = demoActive ? DEMO_UBER_SUGGESTIONS : liveSuggestions
+
+  // Log when demo mode activates
+  useEffect(() => {
+    if (demoActive) console.log('[POLYSIGNAL DEMO] 🚗 Demo mode active — role: Uber driver, org: Uber. Suggestions and pipeline are hardcoded.')
+  }, [demoActive])
 
   const running  = state.running
   const done     = state.finalStatus !== null          // any terminal status counts as done
@@ -46,7 +56,7 @@ export default function App() {
   }, [finished, state.finalStatus, state.error])
 
   return (
-    <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh' }}>
+    <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh', overflow: 'hidden' }}>
       <Sidebar
         activeTab={tab}
         onTabChange={setTab}
@@ -64,7 +74,16 @@ export default function App() {
             onRoleChange={setRole}
             onOrgChange={setOrg}
             onDomainChange={handleDomainChange}
-            onRun={() => domain && run(domain, false, role, org)}
+            onRun={() => {
+              if (!domain) return
+              if (demoActive) {
+                console.log('[POLYSIGNAL DEMO] 🚗 Generate Brief clicked — running demo pipeline for Uber driver')
+                runDemo(DEMO_UBER_RESULT)
+              } else {
+                run(domain, false, role, org)
+              }
+            }}
+            suggestions={suggestions}
           />
         </div>
 
@@ -80,7 +99,7 @@ export default function App() {
         </div>
 
         {/* ── Tab 3: Results ────────────────────────────────────────────── */}
-        <div className={`tab-panel${tab === 3 ? ' active' : ''}`}>
+        <div className={`tab-panel${tab === 3 ? ' active' : ''}`} style={{ overflow: 'hidden', position: 'relative' }}>
           <Tab3Results
             domain={domain ?? 'iran-oil'}
             role={role}
@@ -98,10 +117,87 @@ export default function App() {
 
 // ── Inline tab components ─────────────────────────────────────────────────────
 import { AgentPill, type PillConfig } from './components/AgentPill'
+import { SIGNAL_DOMAINS } from './constants/domains'
 import { ProgressRing }     from './components/ProgressRing'
 import { CorrelationChart } from './components/CorrelationChart'
 import { DirectiveCard }    from './components/DirectiveCard'
-import type { PipelineState, PipelineFullResult, ScreenedMarket } from './types'
+import type { PipelineState, PipelineFullResult } from './types'
+
+// ── Uber driver demo data ─────────────────────────────────────────────────────
+
+function genHistory(start: number, signalJump: number, end: number, noiseAmp = 0.018): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < 60; i++) {
+    const base = i < 20
+      ? start + (signalJump - start) * (i / 20)
+      : signalJump + (end - signalJump) * ((i - 20) / 40);
+    const n = (Math.sin(i * 2.3) + Math.cos(i * 1.7)) * noiseAmp;
+    out.push(Math.max(0.02, Math.min(0.97, base + n)));
+  }
+  return out;
+}
+
+const DEMO_UBER_MARKETS = {
+  confirmed: [
+    { title: 'Brent crude > $120/barrel?',   probHistory: genHistory(0.35, 0.46, 0.67) },
+    { title: 'Hormuz closure by June?',       probHistory: genHistory(0.45, 0.50, 0.58) },
+    { title: 'US gas price > $4/gallon?',     probHistory: genHistory(0.41, 0.47, 0.71) },
+  ],
+  rejected: [
+    { title: 'Iran nuclear deal by Q3?',      probHistory: genHistory(0.34, 0.28, 0.17) },
+    { title: 'OPEC+ cuts reversed by Aug?',   probHistory: genHistory(0.29, 0.25, 0.21) },
+  ],
+};
+
+const DEMO_UBER_RESULT: PipelineFullResult = {
+  status: 'confirmed',
+  selectedMarkets: DEMO_UBER_MARKETS.confirmed.map((m, i) => ({
+    id: `demo-${i}`, title: m.title, probability: m.probHistory[59],
+    volume: 1_200_000 - i * 180_000, daysToResolution: 68 - i * 12,
+    decayWeight: 0.88 - i * 0.05, historicalVolatility: 0.14 + i * 0.02,
+    probHistory: m.probHistory, volumeHistory: [],
+    score: 0.88 - i * 0.05,
+  })),
+  actionDirective: {
+    actor: 'Uber Driver',
+    specificRole: 'Rideshare driver',
+    action: 'As Uber driver at Uber, shift toward high-demand surge zones and lock in weekly earnings targets before the fuel cost spike window opens in the next 14 days',
+    legalMechanism: 'Uber driver earnings boost / fuel surcharge program',
+    geography: 'US rideshare markets — major metro areas',
+    timeWindow: '14 days',
+    effectiveWindowDays: 14,
+    reasoning: 'Correlated Polymarket signals show Brent crude leading US retail gas prices by 3.2 days (r = 0.81). With Hormuz closure probability at 67% and rising, expect a +$0.20–0.35/gallon increase within 10–14 days — compressing per-mile margin by ~8%. Repositioning toward surge zones and higher-density routes before the fuel cost increase maximizes net earnings per hour.',
+    confidenceScore: 0.78,
+    confidenceIntervalLow: 0.62,
+    confidenceIntervalHigh: 0.89,
+    jointPosteriorProbability: 0.74,
+    avgDecayWeight: 0.82,
+    urgency: 'urgent',
+  },
+  mathAnalysis: {
+    correlationDecayAssessment: 'Strong 3-day lead-lag: Brent → US retail gas (r = 0.81, half-life 18 days)',
+    adjustedCorrelationConfidence: 0.78,
+    jointPosteriorProbability: 0.74,
+    jointPosteriorReasoning: 'Joint posterior of Hormuz closure × Brent > $120 conditional on 60-day signal history',
+    confidenceIntervalLow: 0.62,
+    confidenceIntervalHigh: 0.89,
+    confidenceIntervalReasoning: '80% CI derived from bootstrap resampling of historical co-movement windows',
+    derivedDecayWeights: { 'Brent > $120': 0.88, 'Hormuz closure': 0.83, 'US gas > $4': 0.75 },
+    decayDerivationReasoning: 'Exponential decay with 18-day half-life applied to raw correlation coefficients',
+    mathSignalStrength: 81,
+    effectiveActionWindowDays: 14,
+  },
+};
+
+function isUberDriverDemo(role: string, org: string): boolean {
+  return role.toLowerCase().includes('driver') && org.toLowerCase().includes('uber');
+}
+
+const DEMO_UBER_SUGGESTIONS = [
+  { id: 'iran-oil',    relevanceNote: 'Crude price spikes hit your fuel costs within 10–14 days, compressing Uber driver margins.' },
+  { id: 'fed-rates',  relevanceNote: 'Rate hikes raise your vehicle loan payments and soften rider demand on Uber.' },
+  { id: 'us-election', relevanceNote: 'Policy shifts could reshape gig worker classification and Uber driver pay structures.' },
+];
 
 // ── Tab 2 ─────────────────────────────────────────────────────────────────────
 
@@ -145,8 +241,10 @@ const ALL_PILL_KEYS = [
 
 function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state: PipelineState; done: boolean; finished: boolean; retryCount: number; onComplete: () => void }) {
   const agents = state.agents
-  const streamEndRef = useRef<HTMLDivElement>(null)
-  const [activePillKey, setActivePillKey] = useState<string | null>(null)
+  const streamEndRef   = useRef<HTMLDivElement>(null)
+  // Group refs for shared tooltip Y-position on sequential pill pairs
+  const selGroupRef    = useRef<HTMLDivElement>(null)
+  const k2SeqGroupRef  = useRef<HTMLDivElement>(null)
 
   // Progress: count completed agents out of total unique keys
   const uniqueKeys = [...new Set(ALL_PILL_KEYS)]
@@ -161,10 +259,18 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
   // Last completed K2 decision
   const lastDecision = state.k2Decisions[state.k2Decisions.length - 1]
 
+  // Find the last K2 agent that has reasoning text (streaming or completed)
+  const K2_REASONING_KEYS = ['K2ThinkV2-CausalReasoning', 'K2ThinkV2-ActionDirective', 'K2ThinkV2-ReportWriter']
+  const lastReasoningAgent = streamingAgent ?? K2_REASONING_KEYS
+    .map(k => agents[k])
+    .filter(a => a?.partialText)
+    .at(-1)
+  const isLiveReasoning = !!streamingAgent
+
   // Auto-scroll reasoning stream
   useEffect(() => {
     streamEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [streamingAgent?.partialText])
+  }, [lastReasoningAgent?.partialText])
 
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'auto' }}>
@@ -173,6 +279,29 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
         <div style={{ width: '100%', maxWidth: 960, display: 'flex', gap: 24, alignItems: 'flex-start' }}>
           {/* Left: ring + pipeline */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+
+            {/* Retry notification banner */}
+            {retryCount > 0 && state.running && (
+              <div style={{
+                width: '100%',
+                background: 'rgba(53,160,181,0.08)',
+                border: '1px solid rgba(53,160,181,0.25)',
+                borderLeft: '3px solid var(--accent)',
+                borderRadius: 8,
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                animation: 'fadeSlide 0.35s ease',
+              }}>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase', flexShrink: 0 }}>
+                  Auto-retry {retryCount} / 2
+                </div>
+                <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--muted)' }}>
+                  Low-confidence signal — expanding market search with broader parameters…
+                </div>
+              </div>
+            )}
 
             {/* Progress ring — centered, larger */}
             <ProgressRing
@@ -192,20 +321,24 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
                 Parallel market fetch
                 <div className="ps-parallel-line" />
               </div>
+              {/* Fetch: Polymarket → left tooltip, Kalshi → right tooltip */}
               <div className="ps-parallel-cards">
-                {FETCH_PILLS.map(cfg => (
-                  <AgentPill key={cfg.agentKey} config={cfg} agentState={agents[cfg.agentKey]} onClick={() => setActivePillKey(cfg.agentKey)} active={activePillKey === cfg.agentKey} />
-                ))}
+                <AgentPill config={FETCH_PILLS[0]} agentState={agents[FETCH_PILLS[0].agentKey]} tooltipSide="left" />
+                <AgentPill config={FETCH_PILLS[1]} agentState={agents[FETCH_PILLS[1].agentKey]} tooltipSide="right" />
               </div>
               <div className="ps-connector" />
 
-              {/* Sequential enrichment stages */}
-              {SEQUENTIAL_PILLS.map((cfg) => (
-                <div key={cfg.agentKey} className="ps-stage-wrap">
-                  <AgentPill config={cfg} agentState={agents[cfg.agentKey]} onClick={() => setActivePillKey(cfg.agentKey)} active={activePillKey === cfg.agentKey} />
+              {/* Sequential enrichment — both tooltip RIGHT, shared vertical midpoint */}
+              <div ref={selGroupRef}>
+                <div className="ps-stage-wrap">
+                  <AgentPill config={SEQUENTIAL_PILLS[0]} agentState={agents[SEQUENTIAL_PILLS[0].agentKey]} tooltipSide="right" tooltipGroupRef={selGroupRef} />
                   <div className="ps-connector" />
                 </div>
-              ))}
+                <div className="ps-stage-wrap">
+                  <AgentPill config={SEQUENTIAL_PILLS[1]} agentState={agents[SEQUENTIAL_PILLS[1].agentKey]} tooltipSide="right" tooltipGroupRef={selGroupRef} />
+                  <div className="ps-connector" />
+                </div>
+              </div>
 
               {/* K2 Think V2 reasoning pipeline */}
               <div className="ps-parallel-label">
@@ -213,19 +346,22 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
                 K2 Think V2 pipeline
                 <div className="ps-parallel-line" />
               </div>
-              {/* Row 1: historical precedents + causal run in parallel */}
+              {/* K2 parallel: historical → left, causal → right */}
               <div className="ps-parallel-cards">
-                {K2_PARALLEL_PILLS.map(cfg => (
-                  <AgentPill key={cfg.agentKey} config={cfg} agentState={agents[cfg.agentKey]} onClick={() => setActivePillKey(cfg.agentKey)} active={activePillKey === cfg.agentKey} />
-                ))}
+                <AgentPill config={K2_PARALLEL_PILLS[0]} agentState={agents[K2_PARALLEL_PILLS[0].agentKey]} tooltipSide="left" />
+                <AgentPill config={K2_PARALLEL_PILLS[1]} agentState={agents[K2_PARALLEL_PILLS[1].agentKey]} tooltipSide="right" />
               </div>
-              {/* Both converge → directive → report (sequential, full-width) */}
-              {K2_SEQUENTIAL_PILLS.map(cfg => (
-                <div key={cfg.agentKey} className="ps-stage-wrap">
+              {/* K2 sequential: directive + report — both RIGHT, shared vertical midpoint */}
+              <div ref={k2SeqGroupRef}>
+                <div className="ps-stage-wrap">
                   <div className="ps-connector" />
-                  <AgentPill config={cfg} agentState={agents[cfg.agentKey]} onClick={() => setActivePillKey(cfg.agentKey)} active={activePillKey === cfg.agentKey} />
+                  <AgentPill config={K2_SEQUENTIAL_PILLS[0]} agentState={agents[K2_SEQUENTIAL_PILLS[0].agentKey]} tooltipSide="right" tooltipGroupRef={k2SeqGroupRef} />
                 </div>
-              ))}
+                <div className="ps-stage-wrap">
+                  <div className="ps-connector" />
+                  <AgentPill config={K2_SEQUENTIAL_PILLS[1]} agentState={agents[K2_SEQUENTIAL_PILLS[1].agentKey]} tooltipSide="right" tooltipGroupRef={k2SeqGroupRef} />
+                </div>
+              </div>
             </div>
 
             {state.error && (
@@ -234,15 +370,15 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
               </div>
             )}
 
-            {/* Live stream panel — below pipeline */}
-            {streamingAgent && streamingAgent.partialText && (
+            {/* K2 reasoning panel — live while streaming, persists after completion */}
+            {lastReasoningAgent?.partialText && (
               <div className="reasoning-panel">
                 <div className="reasoning-panel-label">
-                  K2 Think V2 — {streamingAgent.id?.replace('K2ThinkV2-', '').replace('Agent', '')} — reasoning
+                  K2 Think V2 — {lastReasoningAgent.id?.replace('K2ThinkV2-', '').replace('Agent', '')} — {isLiveReasoning ? 'reasoning' : 'complete'}
                 </div>
                 <div className="reasoning-panel-text">
-                  {streamingAgent.partialText}
-                  <span className="reasoning-cursor" />
+                  {lastReasoningAgent.partialText}
+                  {isLiveReasoning && <span className="reasoning-cursor" />}
                   <div ref={streamEndRef} />
                 </div>
               </div>
@@ -320,33 +456,6 @@ function Tab2Analysis({ state, done, finished, retryCount, onComplete }: { state
             })()}
 
           </div>
-
-          {/* Right: pill blurb (when a pill is clicked) */}
-          {activePillKey && (() => {
-            const allPills = [...FETCH_PILLS, ...SEQUENTIAL_PILLS, ...K2_PARALLEL_PILLS, ...K2_SEQUENTIAL_PILLS];
-            const pill = allPills.find(p => p.agentKey === activePillKey);
-            const agentState = agents[activePillKey];
-            const status = agentState?.status ?? 'idle';
-            if (!pill) return null;
-            return (
-              <div className="pill-blurb" style={{ position: 'relative' }}>
-                <button className="pill-blurb-close" onClick={() => setActivePillKey(null)}>×</button>
-                <div className="pill-blurb-label">Pipeline step</div>
-                <div className="pill-blurb-name">{pill.label}</div>
-                <div className="pill-blurb-text">{pill.description}</div>
-                <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                    background: status === 'complete' ? 'var(--accent)' : status === 'running' || status === 'streaming' ? 'var(--accent)' : 'var(--dim)',
-                    animation: status === 'running' || status === 'streaming' ? 'pulseDot 1.2s ease-in-out infinite' : undefined,
-                  }} />
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    {status === 'complete' ? 'Complete' : status === 'running' || status === 'streaming' ? 'Running' : status === 'retry' ? 'Retrying' : 'Waiting'}
-                  </span>
-                </div>
-              </div>
-            );
-          })()}
         </div>
       </div>
     </div>
@@ -371,61 +480,74 @@ function Tab3Results({
   confirmedMarkets: { title: string; probHistory: number[] }[]
   rejectedMarkets:  { title: string; probHistory: number[] }[]
 }) {
-  const statusBanner = finalStatus && finalStatus !== 'confirmed' ? STATUS_BANNERS[finalStatus] : null
+  // Use Uber driver demo result when no real pipeline result exists
+  const demoMode = isUberDriverDemo(role, org) && !result
+  const activeResult = demoMode ? DEMO_UBER_RESULT : result
+  const activeStatus = demoMode ? 'confirmed' : finalStatus
+  const activeConfirmed = (confirmedMarkets.length > 0) ? confirmedMarkets
+    : demoMode ? DEMO_UBER_MARKETS.confirmed : []
+  const activeRejected  = (rejectedMarkets.length  > 0) ? rejectedMarkets
+    : demoMode ? DEMO_UBER_MARKETS.rejected  : []
+
+  const statusBanner = activeStatus && activeStatus !== 'confirmed' ? STATUS_BANNERS[activeStatus] : null
+  const domainData = SIGNAL_DOMAINS.find(d => d.id === domain)
 
   return (
-    <>
-      <div className="panel-header">
-        <div>
-          <div className="panel-title"><span className="bw">🗂️</span> Your Intelligence Report</div>
-          <div className="panel-sub">Signal correlation analysis and action directive</div>
-        </div>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', overflow: 'hidden' }}>
+      {/* Left — full-height correlation chart, locked to viewport */}
+      <div style={{ flex: 1, minWidth: 0, background: '#0A0A0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <CorrelationChart
+          confirmedMarkets={activeConfirmed}
+          rejectedMarkets={activeRejected}
+          domain={domain}
+          fillHeight
+          chartTitleTag={domainData?.tag}
+          chartTitleLabel={
+            role && org
+              ? `${domainData?.label ?? domain} — ${role} at ${org}`
+              : domainData?.label
+          }
+        />
       </div>
 
-      <div style={{ padding: '28px 30px', display: 'flex', flexDirection: 'column', gap: 22 }}>
-
-        {/* Non-confirmed status banner — full width */}
-        {statusBanner && (
-          <div style={{
-            background: 'var(--bg3)', border: '1px solid var(--accent-border)',
-            borderLeft: '3px solid #888888', borderRadius: 8, padding: '12px 16px',
-          }}>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--dim)', marginBottom: 4 }}>
-              {finalStatus?.replace(/_/g, ' ')}
+      {/* Right — directive panel, independently scrollable */}
+      <div style={{
+        width: 340,
+        height: '100%',
+        flexShrink: 0,
+        borderLeft: '1px solid rgba(53,160,181,0.12)',
+        background: '#0F0F14',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '28px 18px 20px' }}>
+          {/* Non-confirmed status banner */}
+          {statusBanner && (
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderLeft: '3px solid #888888',
+              borderRadius: 8,
+              padding: '10px 14px',
+            }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--dim)', marginBottom: 4 }}>
+                {activeStatus?.replace(/_/g, ' ')}
+              </div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--muted)', lineHeight: 1.6 }}>
+                {statusBanner}
+              </div>
             </div>
-            <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
-              {statusBanner}
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Two-column: chart left, directive right */}
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-          {/* Left: correlation chart */}
-          <div style={{ flex: '1 1 0', minWidth: 0 }}>
-            <div className="section-label">Signal correlation — 60-day history</div>
-            <div style={{ background: 'var(--bg3)', borderRadius: 8, padding: 18, boxShadow: 'var(--shadow-card)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <CorrelationChart
-                confirmedMarkets={confirmedMarkets}
-                rejectedMarkets={rejectedMarkets}
-                domain={domain}
-              />
-            </div>
-          </div>
-
-          {/* Right: directive */}
-          <div style={{ flex: '1 1 0', minWidth: 0 }}>
-            <div className="section-label">Action directive</div>
-            <DirectiveCard
-              domain={domain}
-              role={role}
-              org={org}
-              result={result ?? undefined}
-            />
-          </div>
+          <DirectiveCard
+            domain={domain}
+            role={role}
+            org={org}
+            result={activeResult ?? undefined}
+          />
         </div>
-
       </div>
-    </>
+    </div>
   )
 }

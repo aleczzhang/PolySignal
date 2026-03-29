@@ -3,6 +3,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { runPipeline } from './orchestrator/index.js';
 import { listDomains } from './domains.js';
+import { suggestDomains } from './agents/domainSuggester.js';
 
 const app = Fastify({ logger: true });
 
@@ -15,6 +16,17 @@ app.get('/health', async () => ({ status: 'ok' }));
 // ── List available domains ────────────────────────────────────────────────────
 
 app.get('/api/domains', async () => listDomains());
+
+// ── Domain suggestions (K2-powered, role + org aware) ─────────────────────────
+
+app.post('/api/domains/suggest', async (req, reply) => {
+  const { role = '', org = '' } = req.body as { role?: string; org?: string };
+  if (role.trim().length < 2 || org.trim().length < 2) {
+    return reply.code(400).send({ error: 'role and org must each be at least 2 characters' });
+  }
+  const suggestions = await suggestDomains(role.trim(), org.trim());
+  return { suggestions };
+});
 
 // ── Pipeline SSE stream ───────────────────────────────────────────────────────
 // GET /api/pipeline?domain=iran-oil&cached=false

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type CSSProperties } from 'react';
 import type { DomainId } from '../types';
 import { SIGNAL_DOMAINS } from '../constants/domains';
 import type { SignalDomain } from '../constants/domains';
+import type { DomainSuggestion } from '../hooks/useDomainSuggestions';
 import { useCanvas } from '../hooks/useCanvas';
 import { RightPanel } from './RightPanel';
 
@@ -23,12 +24,56 @@ const DOMAIN_KEYWORDS: Record<string, string[]> = {
 // ── Teal color keyed to node radius (larger = darker) ────────────────────────
 
 function domainTeal(r: number, hovered: boolean): string {
-  const t = Math.max(0, Math.min(1, (r - 34) / 24));
-  const lr = Math.round(0x7D + (0x18 - 0x7D) * t);
-  const lg = Math.round(0xC4 + (0x58 - 0xC4) * t);
-  const lb = Math.round(0xD0 + (0x68 - 0xD0) * t);
+  const t = Math.max(0, Math.min(1, (r - 50) / 30));
+  const lr = Math.round(0x46 + (0x12 - 0x46) * t);
+  const lg = Math.round(0x82 + (0x44 - 0x82) * t);
+  const lb = Math.round(0x91 + (0x52 - 0x91) * t);
   const dim = hovered ? 22 : 0;
   return `rgb(${Math.max(0, lr - dim)},${Math.max(0, lg - dim)},${Math.max(0, lb - dim)})`;
+}
+
+// ── Ambient circles for empty state (no text, just shapes) ───────────────────
+
+const AMBIENT = [
+  { x: 0.28, y: 0.34, r: 28 },
+  { x: 0.68, y: 0.26, r: 18 },
+  { x: 0.75, y: 0.65, r: 36 },
+  { x: 0.38, y: 0.68, r: 22 },
+  { x: 0.53, y: 0.47, r: 13 },
+];
+
+function drawAmbientCircles(ctx: CanvasRenderingContext2D, w: number, h: number, phase: number) {
+  for (let i = 0; i < AMBIENT.length; i++) {
+    const c = AMBIENT[i];
+    const cx = c.x * w, cy = c.y * h;
+    ctx.save();
+
+    // Pulsing rings — very dim
+    for (let j = 0; j < 2; j++) {
+      const rr = c.r * (1 + (j + 1) * 0.5) + Math.sin(phase + i * 0.9 + j * 1.1) * 2.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(36,107,120,${0.07 - j * 0.02})`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+
+    // Body — very dim
+    ctx.globalAlpha = 0.05;
+    ctx.beginPath();
+    ctx.arc(cx, cy, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${Math.round(0x46 - i * 3)},${Math.round(0x82 - i * 5)},${Math.round(0x91 - i * 5)})`;
+    ctx.fill();
+
+    // Center dot
+    ctx.globalAlpha = 0.12;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fill();
+
+    ctx.restore();
+  }
 }
 
 // ── Canvas drawing helpers ────────────────────────────────────────────────────
@@ -67,10 +112,27 @@ function drawConnections(ctx: CanvasRenderingContext2D, w: number, h: number, al
   ctx.restore();
 }
 
+function wrapText(ctx: CanvasRenderingContext2D, text: string, cx: number, y: number, maxW: number, lineH: number) {
+  const words = text.split(' ');
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, cx, y);
+      line = word;
+      y += lineH;
+    } else {
+      line = test;
+    }
+  }
+  if (line) ctx.fillText(line, cx, y);
+}
+
 function drawNode(
   ctx: CanvasRenderingContext2D, w: number, h: number,
   d: SignalDomain, phase: number,
-  hovered: boolean, unlocked: boolean, alpha: number, relevance: number
+  hovered: boolean, unlocked: boolean, alpha: number, relevance: number,
+  relevanceNote?: string,
 ) {
   const cx = d.x * w, cy = d.y * h, r = d.r;
   const teal = domainTeal(r, hovered);
@@ -99,20 +161,21 @@ function drawNode(
 
   // Center dot
   ctx.beginPath();
-  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 5, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.fill();
 
   // OI (above label)
-  ctx.font = '400 9px "Source Code Pro", monospace';
-  ctx.fillStyle = 'rgba(90,200,220,0.5)';
+  ctx.font = '400 11px "Source Code Pro", monospace';
+  ctx.fillStyle = 'rgba(53,160,181,0.35)';
   ctx.textAlign = 'center';
-  ctx.fillText(d.oi, cx, cy - r - 28);
+  ctx.fillText(d.oi, cx, cy - r - 32);
 
   // Label
-  ctx.font = `${hovered ? 600 : 500} 11px "Source Code Pro", monospace`;
-  ctx.fillStyle = hovered ? '#8DD8E5' : '#5ABECF';
-  ctx.fillText(d.label, cx, cy - r - 14);
+  ctx.font = `${hovered ? 600 : 500} 14px "Source Code Pro", monospace`;
+  ctx.fillStyle = hovered ? '#5ABECF' : '#35A0B5';
+  ctx.fillText(d.label, cx, cy - r - 16);
+
 
   ctx.restore();
 }
@@ -221,12 +284,12 @@ function drawZoomedView(
 
   // Domain name — Figtree bold
   ctx.font = 'bold 28px "Figtree", sans-serif';
-  ctx.fillStyle = '#8DD8E5';
+  ctx.fillStyle = '#5ABECF';
   ctx.fillText(domain.label, 32, 82);
 
   // Exit hint — centered, bottom, larger
   ctx.font = '500 13px "Source Code Pro", monospace';
-  ctx.fillStyle = 'rgba(90,200,220,0.45)';
+  ctx.fillStyle = 'rgba(53,160,181,0.45)';
   ctx.textAlign = 'center';
   ctx.fillText('CLICK OUTSIDE TO EXIT', w / 2, h - 22);
 
@@ -242,6 +305,7 @@ interface Props {
   onOrgChange:    (v: string) => void;
   onDomainChange: (id: DomainId) => void;
   onRun:          () => void;
+  suggestions?:   DomainSuggestion[] | null;
 }
 
 interface Anim {
@@ -254,15 +318,16 @@ interface Anim {
   hintTimer:    number;
 }
 
-export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChange, onRun }: Props) {
+export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChange, onRun, suggestions }: Props) {
   const [activeId, setActiveId]   = useState<string | null>(null);
   const [isZoomed, setIsZoomed]   = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const anim        = useRef<Anim>({ phase: 0, zoomedId: null, zoomT: 0, hoverId: null, hoveredCard: null, hintOpacity: 0, hintTimer: 0 });
-  const roleRef     = useRef(role);    roleRef.current = role;
-  const orgRef      = useRef(org);     orgRef.current  = org;
-  const prevZoomed  = useRef(false);
+  const anim           = useRef<Anim>({ phase: 0, zoomedId: null, zoomT: 0, hoverId: null, hoveredCard: null, hintOpacity: 0, hintTimer: 0 });
+  const roleRef        = useRef(role);        roleRef.current        = role;
+  const orgRef         = useRef(org);         orgRef.current         = org;
+  const suggestionsRef = useRef(suggestions); suggestionsRef.current = suggestions;
+  const prevZoomed     = useRef(false);
 
   const unlocked = role.trim().length >= 2 && org.trim().length >= 2;
   const unlockedRef = useRef(unlocked); unlockedRef.current = unlocked;
@@ -306,17 +371,34 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
 
     const fieldA = 1 - e;
     if (fieldA > 0.01) {
-      const query = (roleRef.current + ' ' + orgRef.current).toLowerCase();
-      const scores = Object.fromEntries(
-        SIGNAL_DOMAINS.map(d => [d.id, DOMAIN_KEYWORDS[d.id].some(kw => query.includes(kw)) ? 1 : 0])
-      );
-      const anyMatch = Object.values(scores).some(s => s > 0);
-      const relevanceMap: Record<string, number> = Object.fromEntries(
-        SIGNAL_DOMAINS.map(d => [d.id, !uLock || !anyMatch ? 1 : scores[d.id] > 0 ? 1 : 0.2])
-      );
-      drawConnections(ctx, w, h, fieldA);
-      for (const d of SIGNAL_DOMAINS) {
-        drawNode(ctx, w, h, d, a.phase, uLock && a.hoverId === d.id, uLock, fieldA, relevanceMap[d.id]);
+      if (!uLock) {
+        // Empty state — just ambient shapes, no domain nodes, no text
+        drawAmbientCircles(ctx, w, h, a.phase);
+      } else {
+        // Filled state — show K2-suggested domain nodes
+        const suggs = suggestionsRef.current;
+        let relevanceMap: Record<string, number>;
+        let noteMap: Record<string, string | undefined>;
+
+        if (suggs && suggs.length > 0) {
+          // K2 suggestions available — use them to drive relevance
+          const suggSet = new Map(suggs.map(s => [s.id, s.relevanceNote]));
+          relevanceMap = Object.fromEntries(
+            SIGNAL_DOMAINS.map(d => [d.id, suggSet.has(d.id) ? 1 : 0.15])
+          );
+          noteMap = Object.fromEntries(
+            SIGNAL_DOMAINS.map(d => [d.id, suggSet.get(d.id)])
+          );
+        } else {
+          // K2 still loading — show all domains equally while waiting
+          relevanceMap = Object.fromEntries(SIGNAL_DOMAINS.map(d => [d.id, 1]));
+          noteMap = {};
+        }
+
+        drawConnections(ctx, w, h, fieldA);
+        for (const d of SIGNAL_DOMAINS) {
+          drawNode(ctx, w, h, d, a.phase, a.hoverId === d.id, true, fieldA, relevanceMap[d.id], noteMap[d.id]);
+        }
       }
     }
 
@@ -329,7 +411,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
         const r    = nd.r + (maxR - nd.r) * e;
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fillStyle = '#0D1F24';
+        ctx.fillStyle = '#0C0C11';
         ctx.fill();
       }
     }
@@ -343,14 +425,14 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
       }
     }
 
-    // Hint
+    // Hint — only show briefly after first unlock, now that ambient→nodes is the visual cue
     if (a.hintOpacity > 0 && uLock && !a.zoomedId && a.zoomT < 0.1) {
       ctx.save();
-      ctx.globalAlpha = a.hintOpacity * 0.65;
-      ctx.font = '500 11px "Source Code Pro", monospace';
+      ctx.globalAlpha = a.hintOpacity * 0.45;
+      ctx.font = '500 10px "Source Code Pro", monospace';
       ctx.fillStyle = '#35A0B5';
       ctx.textAlign = 'center';
-      ctx.fillText('CLICK A DOMAIN TO EXPLORE', w / 2, h - 54);
+      ctx.fillText('CLICK A DOMAIN TO EXPLORE', w / 2, h - 58);
       ctx.restore();
     }
   }
@@ -502,6 +584,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
             org={org}
             onCardHover={handleCardHover}
             onRun={onRun}
+            relevanceNote={suggestions?.find(s => s.id === activeId)?.relevanceNote}
           />
         </div>
       </div>

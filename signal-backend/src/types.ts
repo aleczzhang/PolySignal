@@ -87,7 +87,7 @@ export interface PipelineResult {
 
 export interface PipelineEvent {
   step: 'fetch_poly' | 'fetch_kalshi' | 'select' | 'stat' | 'precedent' | 'causal' | 'action' | 'report' | 'done' | 'error';
-  status: 'running' | 'complete' | 'failed';
+  status: 'running' | 'streaming' | 'complete' | 'failed';
   data?: unknown;
   message?: string;
   agentName?: string;

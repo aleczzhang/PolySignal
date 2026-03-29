@@ -1,6 +1,6 @@
 import { fetchPolymarket, fetchKalshi, loadSnapshot, deduplicateMarkets } from '../agents/marketFetcher.js';
 import { generateSearchStrategy }          from '../agents/searchStrategy.js';
-import { callK2Think, parseK2Json }        from '../k2think.js';
+import { callK2Think, callK2ThinkStream, parseK2Json } from '../k2think.js';
 import { getDomain }                       from '../domains.js';
 import type { DomainConfig }               from '../domains.js';
 import { generateReport }                  from '../pipeline/report.js';
@@ -229,7 +229,8 @@ export async function runPipeline(
     generateHistoricalContext(domain, signalMarkets),
     (async (): Promise<CausalAnalysis | null> => {
       try {
-        const causalRaw = await callK2Think(`
+        let accumulated = '';
+        const causalRaw = await callK2ThinkStream(`
 You are a prediction market intelligence analyst.
 
 Domain: ${domain.name}
@@ -266,7 +267,23 @@ Return ONLY a valid JSON object with these exact keys:
   "signalConfirmed": <true or false>,
   "keyInsight": "<single actionable sentence>"
 }
-`.trim(), 'medium');
+`.trim(), 'medium', (token: string) => {
+          accumulated += token;
+          // Show the model's reasoning — prefer <think> block content, fall back to all output minus JSON
+          let displayText: string;
+          const thinkStart = accumulated.indexOf('<think>');
+          if (thinkStart !== -1) {
+            const inner = accumulated.slice(thinkStart + 7);
+            const thinkEnd = inner.indexOf('</think>');
+            displayText = (thinkEnd === -1 ? inner : inner.slice(0, thinkEnd)).trim();
+          } else {
+            const jsonIdx = accumulated.indexOf('{');
+            displayText = (jsonIdx > 20 ? accumulated.slice(0, jsonIdx) : accumulated).trim();
+          }
+          if (displayText) {
+            emit({ step: 'causal', status: 'streaming', agentName: 'K2ThinkV2-CausalReasoning', data: { partial: displayText } });
+          }
+        });
         return parseK2Json<CausalAnalysis>(causalRaw);
       } catch (err: any) {
         console.error('[causal step failed]', err?.message);
