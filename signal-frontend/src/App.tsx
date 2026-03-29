@@ -13,17 +13,9 @@ export default function App() {
   const [role, setRole]     = useState('')
   const [org,  setOrg]      = useState('')
 
-  const { state, run, reset, runDemo } = usePipeline()
+  const { state, run, reset } = usePipeline()
   const [retryCount, setRetryCount] = useState(0)
-  const { suggestions: liveSuggestions } = useDomainSuggestions(role, org)
-
-  const demoActive = isUberDriverDemo(role, org)
-  const suggestions = demoActive ? DEMO_UBER_SUGGESTIONS : liveSuggestions
-
-  // Log when demo mode activates
-  useEffect(() => {
-    if (demoActive) console.log('[POLYSIGNAL DEMO] 🚗 Demo mode active — role: Uber driver, org: Uber. Suggestions and pipeline are hardcoded.')
-  }, [demoActive])
+  const { suggestions } = useDomainSuggestions(role, org)
 
   const running  = state.running
   const done     = state.finalStatus !== null          // any terminal status counts as done
@@ -76,12 +68,7 @@ export default function App() {
             onDomainChange={handleDomainChange}
             onRun={() => {
               if (!domain) return
-              if (demoActive) {
-                console.log('[POLYSIGNAL DEMO] 🚗 Generate Brief clicked — running demo pipeline for Uber driver')
-                runDemo(DEMO_UBER_RESULT)
-              } else {
-                run(domain, false, role, org)
-              }
+              run(domain, false, role, org)
             }}
             suggestions={suggestions}
           />
@@ -122,82 +109,6 @@ import { ProgressRing }     from './components/ProgressRing'
 import { CorrelationChart } from './components/CorrelationChart'
 import { DirectiveCard }    from './components/DirectiveCard'
 import type { PipelineState, PipelineFullResult } from './types'
-
-// ── Uber driver demo data ─────────────────────────────────────────────────────
-
-function genHistory(start: number, signalJump: number, end: number, noiseAmp = 0.018): number[] {
-  const out: number[] = [];
-  for (let i = 0; i < 60; i++) {
-    const base = i < 20
-      ? start + (signalJump - start) * (i / 20)
-      : signalJump + (end - signalJump) * ((i - 20) / 40);
-    const n = (Math.sin(i * 2.3) + Math.cos(i * 1.7)) * noiseAmp;
-    out.push(Math.max(0.02, Math.min(0.97, base + n)));
-  }
-  return out;
-}
-
-const DEMO_UBER_MARKETS = {
-  confirmed: [
-    { title: 'Brent crude > $120/barrel?',   probHistory: genHistory(0.35, 0.46, 0.67) },
-    { title: 'Hormuz closure by June?',       probHistory: genHistory(0.45, 0.50, 0.58) },
-    { title: 'US gas price > $4/gallon?',     probHistory: genHistory(0.41, 0.47, 0.71) },
-  ],
-  rejected: [
-    { title: 'Iran nuclear deal by Q3?',      probHistory: genHistory(0.34, 0.28, 0.17) },
-    { title: 'OPEC+ cuts reversed by Aug?',   probHistory: genHistory(0.29, 0.25, 0.21) },
-  ],
-};
-
-const DEMO_UBER_RESULT: PipelineFullResult = {
-  status: 'confirmed',
-  selectedMarkets: DEMO_UBER_MARKETS.confirmed.map((m, i) => ({
-    id: `demo-${i}`, title: m.title, probability: m.probHistory[59],
-    volume: 1_200_000 - i * 180_000, daysToResolution: 68 - i * 12,
-    decayWeight: 0.88 - i * 0.05, historicalVolatility: 0.14 + i * 0.02,
-    probHistory: m.probHistory, volumeHistory: [],
-    score: 0.88 - i * 0.05,
-  })),
-  actionDirective: {
-    actor: 'Uber Driver',
-    specificRole: 'Rideshare driver',
-    action: 'As Uber driver at Uber, shift toward high-demand surge zones and lock in weekly earnings targets before the fuel cost spike window opens in the next 14 days',
-    legalMechanism: 'Uber driver earnings boost / fuel surcharge program',
-    geography: 'US rideshare markets — major metro areas',
-    timeWindow: '14 days',
-    effectiveWindowDays: 14,
-    reasoning: 'Correlated Polymarket signals show Brent crude leading US retail gas prices by 3.2 days (r = 0.81). With Hormuz closure probability at 67% and rising, expect a +$0.20–0.35/gallon increase within 10–14 days — compressing per-mile margin by ~8%. Repositioning toward surge zones and higher-density routes before the fuel cost increase maximizes net earnings per hour.',
-    confidenceScore: 0.78,
-    confidenceIntervalLow: 0.62,
-    confidenceIntervalHigh: 0.89,
-    jointPosteriorProbability: 0.74,
-    avgDecayWeight: 0.82,
-    urgency: 'urgent',
-  },
-  mathAnalysis: {
-    correlationDecayAssessment: 'Strong 3-day lead-lag: Brent → US retail gas (r = 0.81, half-life 18 days)',
-    adjustedCorrelationConfidence: 0.78,
-    jointPosteriorProbability: 0.74,
-    jointPosteriorReasoning: 'Joint posterior of Hormuz closure × Brent > $120 conditional on 60-day signal history',
-    confidenceIntervalLow: 0.62,
-    confidenceIntervalHigh: 0.89,
-    confidenceIntervalReasoning: '80% CI derived from bootstrap resampling of historical co-movement windows',
-    derivedDecayWeights: { 'Brent > $120': 0.88, 'Hormuz closure': 0.83, 'US gas > $4': 0.75 },
-    decayDerivationReasoning: 'Exponential decay with 18-day half-life applied to raw correlation coefficients',
-    mathSignalStrength: 81,
-    effectiveActionWindowDays: 14,
-  },
-};
-
-function isUberDriverDemo(role: string, org: string): boolean {
-  return role.toLowerCase().includes('driver') && org.toLowerCase().includes('uber');
-}
-
-const DEMO_UBER_SUGGESTIONS = [
-  { id: 'iran-oil',    relevanceNote: 'Crude price spikes hit your fuel costs within 10–14 days, compressing Uber driver margins.' },
-  { id: 'fed-rates',  relevanceNote: 'Rate hikes raise your vehicle loan payments and soften rider demand on Uber.' },
-  { id: 'us-election', relevanceNote: 'Policy shifts could reshape gig worker classification and Uber driver pay structures.' },
-];
 
 // ── Tab 2 ─────────────────────────────────────────────────────────────────────
 
@@ -480,16 +391,7 @@ function Tab3Results({
   confirmedMarkets: { title: string; probHistory: number[] }[]
   rejectedMarkets:  { title: string; probHistory: number[] }[]
 }) {
-  // Use Uber driver demo result when no real pipeline result exists
-  const demoMode = isUberDriverDemo(role, org) && !result
-  const activeResult = demoMode ? DEMO_UBER_RESULT : result
-  const activeStatus = demoMode ? 'confirmed' : finalStatus
-  const activeConfirmed = (confirmedMarkets.length > 0) ? confirmedMarkets
-    : demoMode ? DEMO_UBER_MARKETS.confirmed : []
-  const activeRejected  = (rejectedMarkets.length  > 0) ? rejectedMarkets
-    : demoMode ? DEMO_UBER_MARKETS.rejected  : []
-
-  const statusBanner = activeStatus && activeStatus !== 'confirmed' ? STATUS_BANNERS[activeStatus] : null
+  const statusBanner = finalStatus && finalStatus !== 'confirmed' ? STATUS_BANNERS[finalStatus] : null
   const domainData = SIGNAL_DOMAINS.find(d => d.id === domain)
 
   return (
@@ -497,8 +399,8 @@ function Tab3Results({
       {/* Left — full-height correlation chart, locked to viewport */}
       <div style={{ flex: 1, minWidth: 0, background: '#0A0A0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <CorrelationChart
-          confirmedMarkets={activeConfirmed}
-          rejectedMarkets={activeRejected}
+          confirmedMarkets={confirmedMarkets}
+          rejectedMarkets={rejectedMarkets}
           domain={domain}
           fillHeight
           chartTitleTag={domainData?.tag}
@@ -532,7 +434,7 @@ function Tab3Results({
               padding: '10px 14px',
             }}>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--dim)', marginBottom: 4 }}>
-                {activeStatus?.replace(/_/g, ' ')}
+                {finalStatus?.replace(/_/g, ' ')}
               </div>
               <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--muted)', lineHeight: 1.6 }}>
                 {statusBanner}
@@ -544,7 +446,7 @@ function Tab3Results({
             domain={domain}
             role={role}
             org={org}
-            result={activeResult ?? undefined}
+            result={result ?? undefined}
           />
         </div>
       </div>
