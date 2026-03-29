@@ -123,13 +123,14 @@ Return ONLY valid JSON:
 
     if (statRetry > MAX_STAT_RETRIES) {
       const reason = 'No statistically correlated cluster found after 3 attempts.';
-      emit({ step: 'done', status: 'complete', data: { status: 'no_signal', reason } });
-      return buildResult({
+      const result = buildResult({
         markets, screened, lagMatrix, cluster: [], rejectedClusters,
-        validation: null, causal: null, math: null, directive: null,
+        validation: null, causal: null, math: null, actionDirective: null,
         audit, report: null, statRetry, causalRetry: 0,
         status: 'no_signal', statusReason: reason,
       });
+      emit({ step: 'done', status: 'complete', data: result });
+      return result;
     }
   }
 
@@ -220,17 +221,18 @@ Return ONLY valid JSON:
   if (!causal?.signalConfirmed) {
     const status = causalRetry > MAX_CAUSAL_RETRIES ? 'causally_ambiguous' : 'low_confidence';
     const reason = `K2 Think V2 could not confirm causal mechanism after ${causalRetry} attempt(s). Human analyst review recommended.`;
-    emit({
-      step: 'done',
-      status: status === 'causally_ambiguous' ? 'ambiguous' : 'complete',
-      data: { status, reason },
-    });
-    return buildResult({
+    const result = buildResult({
       markets, screened, lagMatrix, cluster, rejectedClusters,
-      validation, causal, math: null, directive: null,
+      validation, causal, math: null, actionDirective: null,
       audit, report: null, statRetry, causalRetry,
       status, statusReason: reason,
     });
+    emit({
+      step: 'done',
+      status: status === 'causally_ambiguous' ? 'ambiguous' : 'complete',
+      data: result,
+    });
+    return result;
   }
 
   // ── Step 7: Stakeholders ──────────────────────────────────────────────────
@@ -348,13 +350,14 @@ Return ONLY valid JSON:
   });
   emit({ step: 'report', status: 'complete', data: report });
 
-  emit({ step: 'done', status: 'complete', data: { status: 'confirmed' } });
-  return buildResult({
+  const finalResult = buildResult({
     markets, screened, lagMatrix, cluster, rejectedClusters,
-    validation, causal, math, directive, audit: finalAudit, report,
+    validation, causal, math, actionDirective: directive, audit: finalAudit, report,
     statRetry, causalRetry, status: 'confirmed',
     statusReason: 'Signal confirmed with causal mechanism and operational directive.',
   });
+  emit({ step: 'done', status: 'complete', data: finalResult });
+  return finalResult;
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -362,7 +365,7 @@ Return ONLY valid JSON:
 function buildResult(args: {
   markets: any[]; screened: ScreenedMarket[]; lagMatrix: any;
   cluster: ScreenedMarket[]; rejectedClusters: PipelineResult['rejectedClusters'];
-  validation: any; causal: CausalAnalysis | null; math: any; directive: any;
+  validation: any; causal: CausalAnalysis | null; math: any; actionDirective: any;
   audit: OrchestrationAudit; report: any;
   statRetry: number; causalRetry: number;
   status: PipelineResult['status']; statusReason: string;
@@ -372,12 +375,12 @@ function buildResult(args: {
     enrichedMarkets:   args.markets,
     screenedMarkets:   args.screened,
     lagMatrix:         args.lagMatrix,
-    selectedCluster:   args.cluster,
+    cluster:           args.cluster,
     rejectedClusters:  args.rejectedClusters,
     validationResult:  args.validation,
     causalAnalysis:    args.causal,
     mathAnalysis:      args.math,
-    directive:         args.directive,
+    actionDirective:   args.actionDirective,
     audit:             args.audit,
     report:            args.report,
     statRetryCount:    args.statRetry,

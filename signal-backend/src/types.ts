@@ -94,6 +94,7 @@ export interface CausalAnalysis {
   confidenceScore: number;
   confidenceReasoning: string;
   precedentsIntegrated: string;
+  domainKnowledgeIntegrated?: string;
 }
 
 export interface MathAnalysis {
@@ -149,12 +150,12 @@ export interface PipelineResult {
   enrichedMarkets: EnrichedMarket[];
   screenedMarkets: ScreenedMarket[];
   lagMatrix: LagMatrix | null;
-  selectedCluster: ScreenedMarket[];
+  cluster: ScreenedMarket[];
   rejectedClusters: { markets: ScreenedMarket[]; reason: string; avgR: number }[];
   validationResult: { pairs: any[]; avgR: number; passed: boolean } | null;
   causalAnalysis: CausalAnalysis | null;
   mathAnalysis: MathAnalysis | null;
-  directive: ActionDirective | null;
+  actionDirective: ActionDirective | null;
   audit: OrchestrationAudit | null;
   report: ReportContent | null;
   statRetryCount: number;
