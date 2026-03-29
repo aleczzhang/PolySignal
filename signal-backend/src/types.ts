@@ -47,6 +47,29 @@ export interface ReportContent {
   generatedAt: string;
 }
 
+export interface HistoricalPrecedent {
+  event: string;           // name of the historical event
+  year: number;
+  outcome: string;         // what happened
+  marketSignal: string;    // what the prediction markets showed beforehand
+  relevance: string;       // why this matters for the current signal
+}
+
+export interface HistoricalContext {
+  precedents: HistoricalPrecedent[];
+  patternSummary: string;  // one sentence on what the precedents imply
+}
+
+export interface MarketStats {
+  signalStrength:       number;   // 0-1 composite score of top market
+  topMarketProbability: number;
+  meanProbability:      number;
+  probSpread:           number;   // std dev across selected markets
+  trendDirection:       'rising' | 'falling' | 'flat';
+  correlationStrength:  'strong' | 'moderate' | 'weak';
+  marketCount:          number;
+}
+
 export type PipelineStatus = 'confirmed' | 'low_confidence' | 'no_signal';
 
 export interface PipelineResult {
@@ -56,12 +79,14 @@ export interface PipelineResult {
   causalAnalysis: CausalAnalysis | null;
   actionDirective: ActionDirective | null;
   report: ReportContent | null;
+  marketStats?: MarketStats;
+  historicalContext?: HistoricalContext | null;
   status: PipelineStatus;
   statusReason: string;
 }
 
 export interface PipelineEvent {
-  step: 'fetch' | 'select' | 'causal' | 'action' | 'report' | 'done' | 'error';
+  step: 'fetch_poly' | 'fetch_kalshi' | 'select' | 'stat' | 'precedent' | 'causal' | 'action' | 'report' | 'done' | 'error';
   status: 'running' | 'complete' | 'failed';
   data?: unknown;
   message?: string;
