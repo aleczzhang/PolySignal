@@ -4,18 +4,23 @@
 :root {
   /* Gray ramp — white background, black text */
   --dark1: #FFFFFF;   /* main background — pure white */
-  --dark2: #F4F4F4;   /* sidebar — slightly gray, sits "higher" (Rule 1) */
-  --bg3:   #EEEEEE;   /* cards, inputs */
-  --bg4:   #E4E4E4;   /* hover states */
-  --dim:   #BBBBBB;   /* placeholders, disabled */
-  --muted: #777777;   /* secondary labels */
-  --light: #444444;   /* tertiary text */
-  --text:  #111111;   /* primary — near black */
+  --dark2: #F7F7F9;   /* top nav / sidebar — slightly cool gray */
+  --bg3:   #EEEFF2;   /* cards, inputs */
+  --bg4:   #E2E3E8;   /* hover states */
+  --dim:   #8B92A5;   /* placeholders, disabled — readable medium gray */
+  --muted: #4B5263;   /* secondary labels — clear dark gray */
+  --light: #2D3142;   /* tertiary text */
+  --text:  #0F1117;   /* primary — near black */
 
-  /* Single accent — everything meaningful is black */
-  --pink2: #000000;   /* active, running, CTA — pure black */
-  --pink1: #333333;   /* done, confirmed — dark gray */
-  --amber: #555555;   /* urgent — medium gray */
+  /* Accent — dark teal for K2, active, CTAs */
+  --accent:     #246B78;          /* dark teal — K2 Think V2, active states */
+  --accent-bg:  rgba(36,107,120,0.08);
+  --accent-border: rgba(36,107,120,0.25);
+
+  /* Legacy aliases (components still reference these) */
+  --pink2: var(--accent);         /* active/running → indigo */
+  --pink1: #333333;               /* done — dark gray */
+  --amber: #555555;               /* urgent */
 
   /* Depth tokens (Rule 1) — light shadows on white */
   --shadow-card:   0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
@@ -64,18 +69,22 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
+
+/* Top nav replaces sidebar — full-width sticky header */
 .app-sidebar {
-  width: 260px;
-  flex-shrink: 0;
+  width: 100%;
   background: var(--dark2);
-  border-right: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
   display: flex;
-  flex-direction: column;
-  height: 100vh;
+  flex-direction: row;
+  align-items: center;
+  height: 56px;
   position: sticky;
   top: 0;
-  left: 0;
-  overflow: hidden;
+  z-index: 20;
+  padding: 0 28px;
+  gap: 0;
+  flex-shrink: 0;
 }
 
 .app-main {
@@ -83,7 +92,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: calc(100vh - 56px);
 }
 
 .tab-panel {
@@ -94,84 +103,85 @@ body {
 }
 .tab-panel.active { display: flex; }
 
-/* ── Sidebar brand ────────────────────────────────────────────────────────── */
+/* ── Top nav brand ────────────────────────────────────────────────────────── */
 .sidebar-brand {
-  padding: 28px 24px 22px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   flex-shrink: 0;
+  margin-right: 32px;
+  padding: 0;
+  border-bottom: none;
 }
 
 .brand-name {
   font-family: var(--sans);
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.02em;
+  line-height: 1;
 }
 
-.brand-accent { color: var(--text); }
+.brand-accent { color: var(--accent); }
 
 .brand-sub {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 500;
   color: var(--dim);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-top: 5px;
+  margin-top: 3px;
 }
 
-/* ── Sidebar nav ──────────────────────────────────────────────────────────── */
+/* ── Top nav tabs ─────────────────────────────────────────────────────────── */
 .sidebar-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
   flex: 1;
-  padding: 16px 0;
-  overflow-y: auto;
+  padding: 0;
+  overflow: visible;
 }
 
-.nav-group-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
-  color: var(--dim);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  padding: 0 24px 10px;
-}
+.nav-group-label { display: none; }
 
 .nav-tab {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 24px;
+  gap: 8px;
+  padding: 0 16px;
+  height: 56px;
   cursor: pointer;
   background: none;
   border: none;
-  border-left: 3px solid transparent;
-  width: 100%;
+  border-bottom: 2px solid transparent;
   text-align: left;
   transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
 
 .nav-tab:hover:not(:disabled) { background: rgba(0,0,0,0.03); }
-.nav-tab.active { border-left-color: var(--text); background: rgba(0,0,0,0.04); }
+.nav-tab.active { border-bottom-color: var(--accent); }
 .nav-tab:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .nav-tab-icon {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--dark1);
-  border: 1px solid rgba(0,0,0,0.12);
-  box-shadow: var(--shadow-card);
+  background: var(--bg3);
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .nav-tab.active .nav-tab-icon {
-  background: var(--text);
-  border-color: var(--text);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .nav-step {
@@ -181,44 +191,41 @@ body {
   color: var(--muted);
 }
 
-.nav-tab.active .nav-step { color: var(--dark1); }
+.nav-tab.active .nav-step { color: #FFFFFF; }
 
-.nav-tab-text { flex: 1; min-width: 0; }
+.nav-tab-text { display: flex; align-items: center; gap: 6px; }
 
 .nav-tab-name {
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--muted);
-  line-height: 1.2;
+  line-height: 1;
 }
 .nav-tab.active .nav-tab-name { font-weight: 600; color: var(--text); }
 
-.nav-tab-sub {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--dim);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* Hide sub-label in top nav — no space */
+.nav-tab-sub { display: none; }
 
-/* ── Sidebar status bubble ────────────────────────────────────────────────── */
+/* ── Top nav footer (status) — moved to right side ───────────────────────── */
 .sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border-top: none;
+  margin-left: auto;
   flex-shrink: 0;
 }
 
 .status-bubble {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--dark1);
   border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 6px;
-  padding: 8px 12px;
+  border-radius: 20px;
+  padding: 5px 12px;
   box-shadow: var(--shadow-inset);
 }
 
@@ -230,8 +237,8 @@ body {
   transition: background 0.3s;
 }
 .status-pip.idle    { background: var(--dim); }
-.status-pip.running { background: var(--text); animation: pulseDot 1.2s ease-in-out infinite; }
-.status-pip.done    { background: var(--text); }
+.status-pip.running { background: var(--accent); animation: pulseDot 1.2s ease-in-out infinite; }
+.status-pip.done    { background: var(--accent); }
 
 .status-text {
   font-family: var(--mono);
@@ -362,7 +369,7 @@ body {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--text);
+  background: var(--accent);
   animation: pulseDot 1.8s ease-in-out infinite;
 }
 
@@ -447,8 +454,8 @@ body {
   transition: background 0.25s, border-color 0.25s;
 }
 .pill.prun {
-  background: var(--bg3);
-  border-color: rgba(0,0,0,0.2);
+  background: var(--accent-bg);
+  border-color: var(--accent);
 }
 .pill.pdone {
   background: var(--text);
@@ -463,7 +470,7 @@ body {
   transition: background 0.25s;
 }
 .pill-dot.idle    { background: var(--dim); }
-.pill-dot.running { background: var(--text); animation: pulseDot 1.2s ease-in-out infinite; }
+.pill-dot.running { background: var(--accent); animation: pulseDot 1.2s ease-in-out infinite; }
 .pill-dot.done    { background: #FFFFFF; }
 
 .pill-badge {
@@ -476,9 +483,9 @@ body {
   text-transform: uppercase;
   flex-shrink: 0;
 }
-.pill-badge.code { background: var(--bg4);              color: var(--muted); }
-.pill-badge.math { background: rgba(0,0,0,0.08);        color: var(--light); }
-.pill-badge.k2   { background: var(--text);             color: #FFFFFF;      }
+.pill-badge.code { background: rgba(36,107,120,0.08); color: var(--accent); }
+.pill-badge.math { background: rgba(36,107,120,0.14); color: var(--accent); }
+.pill-badge.k2   { background: var(--accent);          color: #FFFFFF;      }
 
 .pill-main { flex: 1; min-width: 0; }
 
@@ -899,7 +906,25 @@ body {
 }
 .domain-card-lg:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.domain-card-lg-emoji { font-size: 28px; line-height: 1; margin-bottom: 4px; }
+.domain-card-lg-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.domain-card-lg.active .domain-card-lg-icon {
+  background: rgba(255,255,255,0.15);
+}
 
 .domain-card-lg-name {
   font-family: var(--sans);
@@ -956,4 +981,175 @@ body {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
+}
+
+/* ── Reasoning stream panel (Tab 2) ──────────────────────────────────────── */
+.reasoning-panel {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-inset);
+  animation: fadeSlide 0.3s ease;
+}
+
+.reasoning-panel-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reasoning-panel-label::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulseDot 1.2s ease-in-out infinite;
+}
+
+.reasoning-panel-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.reasoning-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.7s step-end infinite;
+  border-radius: 1px;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Active domain card accent stripe ────────────────────────────────────── */
+.domain-card-lg.active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 4px 14px rgba(36,107,120,0.2);
+}
+
+/* Shimmer sweep — used on running agent pills */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
+}
+
+/* ── Running pill shimmer overlay ─────────────────────────────────────────── */
+.pill.prun {
+  position: relative;
+  overflow: hidden;
+}
+
+.pill.prun::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 50%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Run button — tactile press feedback ──────────────────────────────────── */
+.run-btn-large:active:not(:disabled) {
+  transform: scale(0.985) translateY(1px);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.35);
+}
+
+/* Pulse ring on run-btn-large when not disabled (pre-click affordance) */
+@keyframes btnRingPulse {
+  0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 0   rgba(0,0,0,0.2); }
+  70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 8px rgba(0,0,0,0); }
+  100% { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 0   rgba(0,0,0,0); }
+}
+
+.run-btn-large:not(:disabled) {
+  animation: btnRingPulse 2.4s ease-out infinite;
+}
+
+/* ── Pipeline flow visualization (Tab 2) ──────────────────────────────── */
+.ps-flow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Each sequential stage + its downward connector */
+.ps-stage-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Vertical connecting line between stages */
+.ps-connector {
+  width: 2px;
+  height: 14px;
+  background: linear-gradient(to bottom, var(--accent), rgba(36,107,120,0.18));
+  flex-shrink: 0;
+}
+
+/* "K2 parallel analysis" section label */
+.ps-parallel-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.ps-parallel-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.ps-parallel-line {
+  flex: 1;
+  height: 1px;
+  background: var(--accent-border);
+}
+
+/* Side-by-side parallel agent cards */
+.ps-parallel-cards {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.ps-parallel-cards .pill {
+  flex: 1;
+  min-width: 0;
 }

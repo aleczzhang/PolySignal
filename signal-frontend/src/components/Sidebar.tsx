@@ -80,21 +80,15 @@ export function Sidebar({ activeTab, onTabChange, running, done }: Props) {
         })}
       </nav>
 
-      {/* Footer status bubble */}
-      <div className="sidebar-footer">
-        <div className="status-bubble">
-          <div className={`status-pip ${pipStatus}`} />
-          <span className="status-text">{pipLabel}</span>
+      {/* Footer: only show when pipeline is active */}
+      {(running || done) && (
+        <div className="sidebar-footer">
+          <div className="status-bubble">
+            <div className={`status-pip ${pipStatus}`} />
+            <span className="status-text">{pipLabel}</span>
+          </div>
         </div>
-        <div style={{
-          fontFamily: 'var(--mono)', fontSize: 8,
-          color: 'var(--dim)', marginTop: 10,
-          lineHeight: 1.6,
-        }}>
-          Polymarket · Kalshi<br />
-          Real-time SSE pipeline
-        </div>
-      </div>
+      )}
 
     </aside>
   );
