@@ -1,6 +1,5 @@
-import { fetchPolymarket, fetchKalshiActive, fetchKalshiHistorical, loadSnapshot, deduplicateMarkets } from '../agents/marketFetcher.js';
+import { fetchPolymarket, fetchKalshi, loadSnapshot, deduplicateMarkets } from '../agents/marketFetcher.js';
 import { generateSearchStrategy }          from '../agents/searchStrategy.js';
-import type { SearchStrategy }             from '../agents/searchStrategy.js';
 import { callK2Think, parseK2Json }        from '../k2think.js';
 import { getDomain }                       from '../domains.js';
 import type { DomainConfig }               from '../domains.js';
@@ -107,28 +106,6 @@ Return ONLY valid JSON:
   }
 }
 
-// ── Parallel fetch helpers ────────────────────────────────────────────────────
-
-// Default stub used to start Polymarket fetch before K2 strategy returns.
-// Polymarket uses minVolume from strategy but doesn't use kalshiSeries.
-const DEFAULT_STRATEGY: SearchStrategy = { kalshiSeries: [], minVolume: 50000 };
-
-async function parallelFetch(
-  strategy: SearchStrategy,
-  domain: DomainConfig,
-): Promise<EnrichedMarket[]> {
-  const [polyResult, kalshiActiveResult, kalshiHistResult] = await Promise.allSettled([
-    fetchPolymarket(strategy, domain),
-    fetchKalshiActive(strategy),
-    fetchKalshiHistorical(strategy),
-  ]);
-  return deduplicateMarkets([
-    ...(polyResult.status        === 'fulfilled' ? polyResult.value        : []),
-    ...(kalshiActiveResult.status === 'fulfilled' ? kalshiActiveResult.value : []),
-    ...(kalshiHistResult.status  === 'fulfilled' ? kalshiHistResult.value  : []),
-  ]);
-}
-
 // ── Pipeline ──────────────────────────────────────────────────────────────────
 
 export async function runPipeline(
@@ -140,7 +117,9 @@ export async function runPipeline(
 ): Promise<PipelineResult> {
   const domain: DomainConfig = getDomain(domainId);
 
-  // ── Step 2: Fetch markets (Polymarket + Kalshi in parallel) ──────────────
+  // ── Step 2: Fetch markets ─────────────────────────────────────────────────
+  // Strategy generates first (both fetches depend on the same Kalshi series tickers).
+  // Then Polymarket and Kalshi fetch in true parallel — same process, different API endpoints.
   let markets: EnrichedMarket[];
 
   if (useCached) {
@@ -150,13 +129,14 @@ export async function runPipeline(
     emit({ step: 'fetch_poly',   status: 'complete', data: { count: markets.length } });
     emit({ step: 'fetch_kalshi', status: 'complete', data: { count: 0 } });
   } else {
-    // Polymarket: start immediately using default minVolume (K2 still filters by domain relevance).
-    // Kalshi:     needs K2-generated series tickers first, so strategy generation runs in parallel.
-    // Both resolve independently and emit their own complete events.
+    // Step 2a: Generate strategy (sequential — shared by both fetches)
+    const strategy = await generateSearchStrategy(domain);
+
+    // Step 2b: Both fetches start simultaneously with the real strategy
     emit({ step: 'fetch_poly',   status: 'running', agentName: 'PolymarketFetchAgent' });
     emit({ step: 'fetch_kalshi', status: 'running', agentName: 'KalshiFetchAgent'     });
 
-    const polyPromise = fetchPolymarket(DEFAULT_STRATEGY, domain)
+    const polyPromise = fetchPolymarket(strategy, domain)
       .then(result => {
         emit({ step: 'fetch_poly', status: 'complete', data: { count: result.length } });
         return result;
@@ -166,16 +146,8 @@ export async function runPipeline(
         return [] as EnrichedMarket[];
       });
 
-    const kalshiPromise = generateSearchStrategy(domain)
-      .then(async strategy => {
-        const [active, hist] = await Promise.allSettled([
-          fetchKalshiActive(strategy),
-          fetchKalshiHistorical(strategy),
-        ]);
-        const result = deduplicateMarkets([
-          ...(active.status === 'fulfilled' ? active.value : []),
-          ...(hist.status   === 'fulfilled' ? hist.value   : []),
-        ]);
+    const kalshiPromise = fetchKalshi(strategy, domain)
+      .then(result => {
         emit({ step: 'fetch_kalshi', status: 'complete', data: { count: result.length } });
         return result;
       })
@@ -189,15 +161,22 @@ export async function runPipeline(
 
     // Expand search if too few markets came back
     if (markets.length < 4) {
-      emit({ step: 'fetch_kalshi', status: 'running', agentName: 'KalshiFetchAgent', message: 'Expanding search with broader terms…' });
+      emit({ step: 'fetch_poly',   status: 'running', agentName: 'PolymarketFetchAgent', message: 'Expanding search…' });
+      emit({ step: 'fetch_kalshi', status: 'running', agentName: 'KalshiFetchAgent',     message: 'Expanding search…' });
       try {
         const broadStrategy = await generateSearchStrategy(domain, { broader: true });
-        const extra = await parallelFetch(broadStrategy, domain);
+        const [extraPoly, extraKalshi] = await Promise.allSettled([
+          fetchPolymarket(broadStrategy, domain),
+          fetchKalshi(broadStrategy, domain),
+        ]);
+        const extra = deduplicateMarkets([
+          ...(extraPoly.status   === 'fulfilled' ? extraPoly.value   : []),
+          ...(extraKalshi.status === 'fulfilled' ? extraKalshi.value : []),
+        ]);
         markets = deduplicateMarkets([...markets, ...extra]);
-        emit({ step: 'fetch_kalshi', status: 'complete', data: { count: markets.length, expanded: true } });
-      } catch {
-        emit({ step: 'fetch_kalshi', status: 'complete', data: { count: markets.length } });
-      }
+      } catch { /* proceed with what we have */ }
+      emit({ step: 'fetch_poly',   status: 'complete', data: { count: markets.length } });
+      emit({ step: 'fetch_kalshi', status: 'complete', data: { count: markets.length } });
     }
   }
 
@@ -229,8 +208,25 @@ export async function runPipeline(
     ? `${role || 'Policy analyst'} at ${org || 'unspecified organization'}`
     : 'a senior policy analyst';
 
+  // Separate active (forward-looking) from resolved (historical fact) markets.
+  // Only active markets are valid prediction signals. Resolved markets are ground truth.
+  const activeMarkets   = selectedMarkets.filter(m => !m.isResolved);
+  const resolvedMarkets = selectedMarkets.filter(m => m.isResolved);
+  // Use active markets for probability stats; fall back to all if none are active
+  const signalMarkets   = activeMarkets.length > 0 ? activeMarkets : selectedMarkets;
+
+  const activeSignalsText = activeMarkets.length > 0
+    ? activeMarkets.map(m => `- "${m.title}"
+  Probability: ${Math.round(m.probability * 100)}%  |  Volume: $${Math.round(m.volume).toLocaleString()}
+  Days to resolution: ${m.daysToResolution}  |  Source: ${m.source}  |  Signal score: ${m.score.toFixed(2)}`).join('\n')
+    : '(none — all fetched markets have already resolved)';
+
+  const resolvedContextText = resolvedMarkets.length > 0
+    ? resolvedMarkets.map(m => `- "${m.title}": resolved ${m.outcome === 'yes' ? 'YES' : 'NO'} (was at ${Math.round(m.probability * 100)}%)`).join('\n')
+    : '(none)';
+
   const [historicalContext, causal] = await Promise.all([
-    generateHistoricalContext(domain, selectedMarkets),
+    generateHistoricalContext(domain, signalMarkets),
     (async (): Promise<CausalAnalysis | null> => {
       try {
         const causalRaw = await callK2Think(`
@@ -242,22 +238,24 @@ Causal chain: ${domain.causalChainDescription}
 DECISION-MAKER: ${decisionMaker} — emphasize the aspects of the causal mechanism most operationally relevant to their authority and constraints.
 
 STATISTICAL ANALYSIS SUMMARY:
-- Markets analyzed: ${marketStats.marketCount}
+- Active (unresolved) markets: ${activeMarkets.length}
+- Resolved (settled) markets: ${resolvedMarkets.length}
 - Signal strength: ${(marketStats.signalStrength * 100).toFixed(0)}% (${marketStats.correlationStrength})
 - Top market probability: ${Math.round(marketStats.topMarketProbability * 100)}%
 - Mean probability across markets: ${Math.round(marketStats.meanProbability * 100)}%
 - Probability spread (std dev): ${(marketStats.probSpread * 100).toFixed(1)}%
 - Trend direction (7-day): ${marketStats.trendDirection}
 
-TOP PREDICTION MARKET SIGNALS (ranked by signal strength):
-${selectedMarkets.map(m => `- "${m.title}"
-  Probability: ${Math.round(m.probability * 100)}%  |  Volume: $${Math.round(m.volume).toLocaleString()}
-  Days to resolution: ${m.daysToResolution}  |  Source: ${m.source}  |  Signal score: ${m.score.toFixed(2)}`).join('\n')}
+FORWARD-LOOKING SIGNALS — unresolved markets (base your causal reasoning on these):
+${activeSignalsText}
 
-Based on these signals:
+RESOLVED MARKET CONTEXT — already settled (treat as historical facts, not predictions):
+${resolvedContextText}
+
+Based on the forward-looking signals:
 1. Identify the causal mechanism — what chain of events does the market consensus imply?
 2. Describe the propagation chain from the leading signal to downstream effects.
-3. Assign a confidence score (0–100). Confirm the signal if >= 50.
+3. Assign a confidence score (0–100). Confirm the signal if >= 50 AND at least one active signal exists.
 4. Write one key insight: the single sentence a decision-maker needs to act.
 
 Return ONLY a valid JSON object with these exact keys:
@@ -283,15 +281,19 @@ Return ONLY a valid JSON object with these exact keys:
   // ── Step 6: K2 action directive ───────────────────────────────────────────
   emit({ step: 'action', status: 'running', agentName: 'K2ThinkV2-ActionDirective' });
 
-  // Weighted probability: top market gets 60%, average of rest gets 40%
-  const avgProb   = selectedMarkets.reduce((s, m) => s + m.probability, 0) / selectedMarkets.length;
-  const topProb   = selectedMarkets[0]?.probability ?? 0.5;
+  // Weighted probability uses only active (unresolved) markets as signals
+  const avgProb   = signalMarkets.reduce((s, m) => s + m.probability, 0) / signalMarkets.length;
+  const topProb   = signalMarkets[0]?.probability ?? 0.5;
   const jointProb = topProb * 0.6 + avgProb * 0.4;
   const ciLow     = Math.max(0, jointProb - 0.10);
   const ciHigh    = Math.min(1, jointProb + 0.10);
 
-  const historicalNote = historicalContext
+  const historicalNote = historicalContext?.precedents?.length
     ? `\nHISTORICAL PRECEDENTS:\n${historicalContext.precedents.map(p => `- ${p.event} (${p.year}): ${p.relevance}`).join('\n')}\nPattern: ${historicalContext.patternSummary}`
+    : '';
+
+  const resolvedNote = resolvedMarkets.length > 0
+    ? `\nRESOLVED MARKET CONTEXT (already happened — use for reasoning context, not as forward signal):\n${resolvedMarkets.map(m => `- "${m.title}": ${m.outcome === 'yes' ? 'YES' : 'NO'}`).join('\n')}`
     : '';
 
   let directive: ActionDirective | null = null;
@@ -308,11 +310,14 @@ The actor, action, legal mechanism, and reasoning MUST be tailored specifically 
 Domain: ${domain.name}
 ${causal ? `Causal mechanism: ${causal.causalMechanism}
 Key insight: ${causal.keyInsight}
-Confidence: ${causal.confidenceScore}/100` : ''}${historicalNote}
+Confidence: ${causal.confidenceScore}/100` : ''}${historicalNote}${resolvedNote}
 Joint probability: ${Math.round(jointProb * 100)}%
 
-SIGNALS:
-${selectedMarkets.map(m => `- "${m.title}": ${Math.round(m.probability * 100)}%`).join('\n')}
+FORWARD-LOOKING SIGNALS (base your recommendation on these — unresolved markets only):
+${activeMarkets.length > 0
+  ? activeMarkets.map(m => `- "${m.title}": ${Math.round(m.probability * 100)}%`).join('\n')
+  : '(no active markets — all context is from resolved events; acknowledge this limits predictive confidence)'
+}
 
 Rules:
 - Name the EXACT actor matching the decision-maker's role and organization
