@@ -2,15 +2,13 @@ import { useReducer, useCallback, useRef } from 'react';
 import type { PipelineState, AgentId, AgentState, ScreenedMarket, PipelineFullResult } from '../types';
 
 const STEP_TO_AGENT: Record<string, AgentId> = {
-  fetch:        'MarketFetcherAgent',
-  screen:       'StatisticalScreenerAgent',
-  cluster:      'K2ThinkV2-Orchestrator',
-  contradiction:'ContradictionDetectorAgent',
+  fetch_poly:   'PolymarketFetchAgent',
+  fetch_kalshi: 'KalshiFetchAgent',
+  select:       'MarketSelectorAgent',
+  stat:         'StatisticalScreenerAgent',
   precedent:    'HistoricalPrecedentAgent',
   causal:       'K2ThinkV2-CausalReasoning',
-  math:         'K2ThinkV2-MathReasoning',
   action:       'K2ThinkV2-ActionDirective',
-  audit:        'K2ThinkV2-MetaReasoning',
   report:       'K2ThinkV2-ReportWriter',
 };
 
@@ -52,11 +50,11 @@ export function usePipeline() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const esRef = useRef<EventSource | null>(null);
 
-  const run = useCallback((domain: string, useCached = false) => {
+  const run = useCallback((domain: string, useCached = false, role = '', org = '') => {
     esRef.current?.close();
     dispatch({ type: 'START' });
 
-    const url = `/api/pipeline?domain=${encodeURIComponent(domain)}${useCached ? '&cached=true' : ''}`;
+    const url = `/api/pipeline?domain=${encodeURIComponent(domain)}${useCached ? '&cached=true' : ''}${role ? `&role=${encodeURIComponent(role)}` : ''}${org ? `&org=${encodeURIComponent(org)}` : ''}`;
     const es = new EventSource(url);
     esRef.current = es;
 

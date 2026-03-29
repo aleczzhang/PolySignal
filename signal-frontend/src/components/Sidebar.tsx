@@ -5,6 +5,7 @@ interface Props {
   onTabChange: (t: TabId) => void;
   running:     boolean;
   done:        boolean;
+  finished:    boolean;   // any terminal state (confirmed | low_confidence | no_signal | …)
 }
 
 const TABS: { id: TabId; name: string; sub: string }[] = [
@@ -13,11 +14,11 @@ const TABS: { id: TabId; name: string; sub: string }[] = [
   { id: 3, name: 'Results',  sub: 'Intelligence report' },
 ];
 
-export function Sidebar({ activeTab, onTabChange, running, done }: Props) {
+export function Sidebar({ activeTab, onTabChange, running, done, finished }: Props) {
   function accessible(id: TabId) {
     if (id === 1) return true;
-    if (id === 2) return running || done;
-    if (id === 3) return done;
+    if (id === 2) return running || finished;
+    if (id === 3) return finished;
     return false;
   }
 
@@ -45,15 +46,15 @@ export function Sidebar({ activeTab, onTabChange, running, done }: Props) {
           const canUse = accessible(tab.id);
 
           // Dot inside icon
-          const isTabRunning = tab.id === 2 && running;
-          const isTabDone    = tab.id === 3 && done;
+          const isTabRunning  = tab.id === 2 && running;
+          const isTabFinished = tab.id === 3 && finished;
           const dotEl = isTabRunning ? (
             <span style={{
               display: 'block', width: 6, height: 6, borderRadius: '50%',
               background: 'var(--pink2)',
               animation: 'pulseDot 1.2s ease-in-out infinite',
             }} />
-          ) : isTabDone ? (
+          ) : isTabFinished ? (
             <span style={{
               display: 'block', width: 6, height: 6, borderRadius: '50%',
               background: 'var(--pink1)',
@@ -81,7 +82,7 @@ export function Sidebar({ activeTab, onTabChange, running, done }: Props) {
       </nav>
 
       {/* Footer: only show when pipeline is active */}
-      {(running || done) && (
+      {(running || finished) && (
         <div className="sidebar-footer">
           <div className="status-bubble">
             <div className={`status-pip ${pipStatus}`} />

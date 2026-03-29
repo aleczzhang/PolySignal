@@ -143,7 +143,7 @@ async function enrichPolymarket(m: any): Promise<EnrichedMarket> {
   });
 }
 
-async function fetchPolymarket(
+export async function fetchPolymarket(
   strategy: SearchStrategy,
   domain: DomainConfig,
 ): Promise<EnrichedMarket[]> {
@@ -154,12 +154,10 @@ async function fetchPolymarket(
   ]);
   const allCandidates = [...activeCandidates, ...resolvedCandidates];
 
-  // Cap at top 200 by volume before sending to K2 (context limit)
-  const topCandidates = allCandidates.slice(0, 200);
-  console.log(`[Polymarket] ${allCandidates.length} candidates → trimmed to top ${topCandidates.length} → sending to K2 for relevance filter`);
+  console.log(`[Polymarket] ${allCandidates.length} candidates (volume-filtered) → sending to K2 for relevance filter`);
 
   // Stage 2 — K2 decides what's relevant
-  const relevance = await filterByRelevance(topCandidates, domain);
+  const relevance = await filterByRelevance(allCandidates, domain);
   const keptCount = relevance.relevantIds.length + relevance.historicalIds.length;
   console.log(`[Polymarket] K2 kept ${keptCount} events: ${relevance.reasoning}`);
 
@@ -177,7 +175,7 @@ async function fetchPolymarket(
 // Series tickers are already domain-specific — KXWTI only has WTI markets, etc.
 // No AI filtering needed here.
 
-async function fetchKalshiActive(strategy: SearchStrategy): Promise<EnrichedMarket[]> {
+export async function fetchKalshiActive(strategy: SearchStrategy): Promise<EnrichedMarket[]> {
   const results: EnrichedMarket[] = [];
   for (const series of strategy.kalshiSeries) {
     try {
@@ -197,7 +195,7 @@ async function fetchKalshiActive(strategy: SearchStrategy): Promise<EnrichedMark
   return results;
 }
 
-async function fetchKalshiHistorical(strategy: SearchStrategy): Promise<EnrichedMarket[]> {
+export async function fetchKalshiHistorical(strategy: SearchStrategy): Promise<EnrichedMarket[]> {
   const results: EnrichedMarket[] = [];
   for (const series of strategy.kalshiSeries) {
     try {
@@ -217,11 +215,9 @@ async function fetchKalshiHistorical(strategy: SearchStrategy): Promise<Enriched
   return results;
 }
 
-const KALSHI_ENERGY_TERMS = /oil|gas|energy|wti|brent|crude|barrel|opec|lng|ngl|fuel|gasoline|diesel|petroleum|spr|strategic.?petroleum|iran|hormuz|sanction/i;
-
 async function enrichKalshi(m: any, series: string, isHistorical: boolean): Promise<EnrichedMarket | null> {
   const title = m.title ?? '';
-  if (!KALSHI_ENERGY_TERMS.test(title)) return null;
+  if (!title) return null;  // skip untitled markets only
 
   const probability      = parseFloat(m.last_price_dollars ?? m.yes_bid_dollars ?? '0.5');
   const isResolved       = m.status === 'settled' || m.result === 'yes' || m.result === 'no';
@@ -320,7 +316,7 @@ export async function fetchAndEnrich(
   return deduplicateMarkets(all);
 }
 
-function deduplicateMarkets(markets: EnrichedMarket[]): EnrichedMarket[] {
+export function deduplicateMarkets(markets: EnrichedMarket[]): EnrichedMarket[] {
   const seen = new Set<string>();
   return markets.filter(m => {
     const key = m.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
