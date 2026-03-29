@@ -8,11 +8,14 @@ export interface PillConfig {
   sub: string;
   badge: BadgeKind;
   maxRetries: number | null;
+  description?: string;
 }
 
 interface Props {
   config: PillConfig;
   agentState?: AgentState;
+  onClick?: () => void;
+  active?: boolean;
 }
 
 const BADGE_LABELS: Record<BadgeKind, string> = {
@@ -43,21 +46,32 @@ function useElapsed(startedAt?: number, completedAt?: number): string | null {
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function AgentPill({ config, agentState }: Props) {
+export function AgentPill({ config, agentState, onClick, active }: Props) {
   const status = agentState?.status ?? 'idle';
+  const [hovered, setHovered] = useState(false);
 
   const isDone    = status === 'complete';
   const isRunning = status === 'running' || status === 'streaming';
   const isRetry   = status === 'retry';
 
-  const pillClass = isDone ? 'pill pdone' : isRunning || isRetry ? 'pill prun' : 'pill';
+  const pillClass = [
+    isDone ? 'pill pdone' : isRunning || isRetry ? 'pill prun' : 'pill',
+    active ? 'pill-active' : '',
+  ].join(' ').trim();
+
   const dotClass  = isDone ? 'pill-dot done' : isRunning ? 'pill-dot running' : 'pill-dot idle';
 
   const elapsed = useElapsed(agentState?.startedAt, agentState?.completedAt);
   const retry   = agentState?.retryCount ?? 0;
 
   return (
-    <div className={pillClass}>
+    <div
+      className={pillClass}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ outline: active ? '1px solid rgba(53,160,181,0.5)' : undefined }}
+    >
       {/* Status dot */}
       <div className={dotClass} />
 
@@ -83,6 +97,33 @@ export function AgentPill({ config, agentState }: Props) {
           </span>
         )}
       </div>
+
+      {/* Hover tooltip */}
+      {hovered && config.description && (
+        <div style={{
+          position: 'absolute',
+          bottom: 'calc(100% + 8px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1E1E26',
+          border: '1px solid rgba(53,160,181,0.3)',
+          borderRadius: 6,
+          padding: '8px 12px',
+          fontFamily: 'var(--mono)',
+          fontSize: 10,
+          color: 'var(--muted)',
+          lineHeight: 1.55,
+          zIndex: 200,
+          pointerEvents: 'none',
+          animation: 'fadeIn 0.15s ease',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+          whiteSpace: 'normal',
+          maxWidth: 260,
+          width: 'max-content',
+        }}>
+          {config.description}
+        </div>
+      )}
     </div>
   );
 }

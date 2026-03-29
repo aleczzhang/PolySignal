@@ -89,7 +89,7 @@ function drawChart(canvas: HTMLCanvasElement, lines: MarketLine[], frame: number
   const toY = (v: number) => PAD.top  + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * chartH;
 
   // Background
-  ctx.fillStyle = '#F8FAFB';
+  ctx.fillStyle = '#0A0A0D';
   ctx.fillRect(0, 0, w, h);
 
   // Grid lines
@@ -99,20 +99,20 @@ function drawChart(canvas: HTMLCanvasElement, lines: MarketLine[], frame: number
     ctx.beginPath();
     ctx.moveTo(PAD.left, y);
     ctx.lineTo(w - PAD.right, y);
-    ctx.strokeStyle = v === 0.50 ? 'rgba(36,107,120,0.12)' : 'rgba(0,0,0,0.06)';
+    ctx.strokeStyle = v === 0.50 ? 'rgba(53,160,181,0.15)' : 'rgba(255,255,255,0.05)';
     ctx.lineWidth = v === 0.50 ? 1 : 0.5;
     ctx.stroke();
   });
 
   // Y labels
-  ctx.fillStyle = '#8B92A5';
+  ctx.fillStyle = '#7A80A0';
   ctx.font = `500 9px "Source Code Pro", monospace`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   gridVals.forEach(v => ctx.fillText(`${Math.round(v * 100)}%`, PAD.left - 8, toY(v)));
 
   // X labels
-  ctx.fillStyle = '#8B92A5';
+  ctx.fillStyle = '#7A80A0';
   ctx.font = `500 9px "Source Code Pro", monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
@@ -248,8 +248,8 @@ export function CorrelationChart({ confirmedMarkets, rejectedMarkets = [], domai
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{
         position: 'relative', height: 260,
-        background: '#F8FAFB',
-        border: '1px solid rgba(36,107,120,0.12)',
+        background: '#0A0A0D',
+        border: '1px solid rgba(53,160,181,0.12)',
         borderRadius: 8,
         overflow: 'hidden',
       }}>

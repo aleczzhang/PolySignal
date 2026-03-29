@@ -34,7 +34,7 @@ function domainTeal(r: number, hovered: boolean): string {
 // ── Canvas drawing helpers ────────────────────────────────────────────────────
 
 function drawGrid(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.028)';
   ctx.lineWidth = 0.5;
   const S = 36;
   for (let x = 0; x <= w + S; x += S) {
@@ -75,7 +75,7 @@ function drawNode(
   const cx = d.x * w, cy = d.y * h, r = d.r;
   const teal = domainTeal(r, hovered);
   ctx.save();
-  ctx.globalAlpha = alpha * (unlocked ? 1 : 0.3) * relevance;
+  ctx.globalAlpha = alpha * (unlocked ? 1 : 0.06) * relevance;
 
   // Pulsing rings
   for (let i = 0; i < 3; i++) {
@@ -105,13 +105,13 @@ function drawNode(
 
   // OI (above label)
   ctx.font = '400 9px "Source Code Pro", monospace';
-  ctx.fillStyle = 'rgba(36,107,120,0.45)';
+  ctx.fillStyle = 'rgba(90,200,220,0.5)';
   ctx.textAlign = 'center';
   ctx.fillText(d.oi, cx, cy - r - 28);
 
   // Label
   ctx.font = `${hovered ? 600 : 500} 11px "Source Code Pro", monospace`;
-  ctx.fillStyle = hovered ? '#1E3A44' : '#3D7A88';
+  ctx.fillStyle = hovered ? '#8DD8E5' : '#5ABECF';
   ctx.fillText(d.label, cx, cy - r - 14);
 
   ctx.restore();
@@ -154,7 +154,7 @@ function drawZoomedView(
   const yMin = 106, yMax = h - 72;
 
   // Subtle grid
-  ctx.strokeStyle = 'rgba(0,0,0,0.028)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.028)';
   ctx.lineWidth = 0.4;
   const S = 36;
   for (let x = 0; x <= w + S; x += S) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
@@ -215,18 +215,18 @@ function drawZoomedView(
 
   // Domain tag (top-left)
   ctx.font = '600 9px "Source Code Pro", monospace';
-  ctx.fillStyle = '#246B78';
+  ctx.fillStyle = '#35A0B5';
   ctx.textAlign = 'left';
   ctx.fillText(domain.tag, 32, 44);
 
   // Domain name — Figtree bold
   ctx.font = 'bold 28px "Figtree", sans-serif';
-  ctx.fillStyle = '#1E3A44';
+  ctx.fillStyle = '#8DD8E5';
   ctx.fillText(domain.label, 32, 82);
 
   // Exit hint — centered, bottom, larger
   ctx.font = '500 13px "Source Code Pro", monospace';
-  ctx.fillStyle = 'rgba(36,107,120,0.4)';
+  ctx.fillStyle = 'rgba(90,200,220,0.45)';
   ctx.textAlign = 'center';
   ctx.fillText('CLICK OUTSIDE TO EXIT', w / 2, h - 22);
 
@@ -300,7 +300,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
     const e     = easeInOut(a.zoomT);
     const uLock = unlockedRef.current;
 
-    ctx.fillStyle = '#f5f6f4';
+    ctx.fillStyle = '#0A0A0D';
     ctx.fillRect(0, 0, w, h);
     drawGrid(ctx, w, h);
 
@@ -329,7 +329,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
         const r    = nd.r + (maxR - nd.r) * e;
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fillStyle = '#eef4f5';
+        ctx.fillStyle = '#0D1F24';
         ctx.fill();
       }
     }
@@ -348,7 +348,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
       ctx.save();
       ctx.globalAlpha = a.hintOpacity * 0.65;
       ctx.font = '500 11px "Source Code Pro", monospace';
-      ctx.fillStyle = '#246B78';
+      ctx.fillStyle = '#35A0B5';
       ctx.textAlign = 'center';
       ctx.fillText('CLICK A DOMAIN TO EXPLORE', w / 2, h - 54);
       ctx.restore();
@@ -422,9 +422,9 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
   const inputStyle: CSSProperties = {
     ...SANS,
     fontSize: 14,
-    color: '#0F1F25',
-    background: 'rgba(36,107,120,0.06)',
-    border: '1px solid rgba(36,107,120,0.22)',
+    color: '#E8EAF6',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: 6,
     padding: '11px 16px',
     outline: 'none',
@@ -433,7 +433,7 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
   };
 
   return (
-    <div style={{ display: 'flex', flex: 1, height: '100%', background: '#f5f6f4', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flex: 1, height: '100%', background: '#0A0A0D', position: 'relative', overflow: 'hidden' }}>
 
       {/* Canvas field — grows to fill all space left of panel */}
       <div style={{ flex: 1, position: 'relative', height: '100%', minWidth: 0 }}>
@@ -454,9 +454,9 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
           zIndex: 20,
           transform: isZoomed ? 'translateY(110%)' : 'translateY(0)',
           transition: 'transform 0.26s ease',
-          background: 'rgba(245,246,244,0.97)',
+          background: 'rgba(10,10,13,0.97)',
           backdropFilter: 'blur(12px)',
-          borderTop: '1px solid rgba(36,107,120,0.14)',
+          borderTop: '1px solid rgba(53,160,181,0.15)',
           padding: '12px 32px 14px',
           display: 'flex',
           alignItems: 'flex-end',
@@ -484,11 +484,6 @@ export function SignalField({ role, org, onRoleChange, onOrgChange, onDomainChan
               style={inputStyle}
             />
           </div>
-          {!unlocked && (
-            <span style={{ ...MONO, fontSize: 11, color: 'rgba(36,107,120,0.4)', letterSpacing: '0.08em', flexShrink: 0, paddingBottom: 2 }}>
-              Fill in both fields to unlock
-            </span>
-          )}
         </div>
       </div>
 

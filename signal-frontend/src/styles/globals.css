@@ -2,30 +2,30 @@
 
 /* ── CSS Variables ────────────────────────────────────────────────────────── */
 :root {
-  /* Gray ramp — white background, black text */
-  --dark1: #FFFFFF;   /* main background — pure white */
-  --dark2: #F7F7F9;   /* top nav / sidebar — slightly cool gray */
-  --bg3:   #EEEFF2;   /* cards, inputs */
-  --bg4:   #E2E3E8;   /* hover states */
-  --dim:   #8B92A5;   /* placeholders, disabled — readable medium gray */
-  --muted: #4B5263;   /* secondary labels — clear dark gray */
-  --light: #2D3142;   /* tertiary text */
-  --text:  #0F1117;   /* primary — near black */
+  /* Gray ramp — dark background, light text */
+  --dark1: #0A0A0D;   /* main background — near black */
+  --dark2: #0F0F14;   /* top nav / sidebar */
+  --bg3:   #16161C;   /* cards, inputs */
+  --bg4:   #1E1E26;   /* hover states */
+  --dim:   #424766;   /* placeholders, disabled */
+  --muted: #7A80A0;   /* secondary labels */
+  --light: #A8AECB;   /* tertiary text */
+  --text:  #E8EAF6;   /* primary — near white */
 
-  /* Accent — dark teal for K2, active, CTAs */
-  --accent:     #246B78;          /* dark teal — K2 Think V2, active states */
-  --accent-bg:  rgba(36,107,120,0.08);
-  --accent-border: rgba(36,107,120,0.25);
+  /* Accent — bright teal */
+  --accent:        #35A0B5;
+  --accent-bg:     rgba(53,160,181,0.10);
+  --accent-border: rgba(53,160,181,0.30);
 
-  /* Legacy aliases (components still reference these) */
-  --pink2: var(--accent);         /* active/running → indigo */
-  --pink1: #333333;               /* done — dark gray */
-  --amber: #555555;               /* urgent */
+  /* Legacy aliases */
+  --pink2: var(--accent);
+  --pink1: #5AC8DC;
+  --amber: #A0A8C0;
 
-  /* Depth tokens (Rule 1) — light shadows on white */
-  --shadow-card:   0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
-  --shadow-btn:    inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.18);
-  --shadow-inset:  inset 0 1px 3px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.08);
+  /* Depth tokens — dark */
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-btn:   inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.5);
+  --shadow-inset: inset 0 1px 3px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04);
 
   /* Typography */
   --sans: 'Figtree', sans-serif;
@@ -74,7 +74,7 @@ body {
 .app-sidebar {
   width: 100%;
   background: var(--dark2);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -163,7 +163,7 @@ body {
   white-space: nowrap;
 }
 
-.nav-tab:hover:not(:disabled) { background: rgba(0,0,0,0.03); }
+.nav-tab:hover:not(:disabled) { background: rgba(255,255,255,0.04); }
 .nav-tab.active { border-bottom-color: var(--accent); }
 .nav-tab:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -176,7 +176,7 @@ body {
   justify-content: center;
   flex-shrink: 0;
   background: var(--bg3);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .nav-tab.active .nav-tab-icon {
@@ -222,8 +222,8 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--dark1);
-  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px;
   padding: 5px 12px;
   box-shadow: var(--shadow-inset);
@@ -252,10 +252,10 @@ body {
 
 /* ── Panel header ─────────────────────────────────────────────────────────── */
 .panel-header {
-  background: rgba(255,255,255,0.92);
+  background: rgba(10,10,13,0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -298,7 +298,7 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.07);
 }
 
 /* ── Inputs (inset) ───────────────────────────────────────────────────────── */
@@ -323,7 +323,7 @@ body {
 
 /* ── Buttons (outset) ─────────────────────────────────────────────────────── */
 .run-btn {
-  background: linear-gradient(to bottom, #333333, #111111);
+  background: linear-gradient(to bottom, #35A0B5, #246B78);
   box-shadow: var(--shadow-btn);
   border: none;
   border-radius: 6px;
@@ -339,7 +339,7 @@ body {
   gap: 8px;
 }
 .run-btn:hover:not(:disabled) {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(53,160,181,0.4);
   transform: translateY(-1px);
 }
 .run-btn:active:not(:disabled) {
@@ -355,8 +355,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 10px 4px 8px;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.14);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 20px;
   font-family: var(--mono);
   font-size: 9px;
@@ -375,9 +375,9 @@ body {
 
 /* ── Domain cards ─────────────────────────────────────────────────────────── */
 .domain-card {
-  background: var(--dark1);
+  background: var(--bg3);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
   padding: 16px;
   cursor: pointer;
@@ -388,7 +388,7 @@ body {
 }
 .domain-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .domain-card.active {
   background: var(--text);
@@ -403,9 +403,9 @@ body {
 
 /* ── Spark card ───────────────────────────────────────────────────────────── */
 .spark-card {
-  background: var(--dark1);
+  background: var(--bg3);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
   padding: 14px;
   overflow: hidden;
@@ -431,8 +431,8 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: 7px;
   font-family: var(--sans);
   font-size: 12px;
@@ -448,18 +448,29 @@ body {
   gap: 10px;
   padding: 11px 15px;
   border-radius: 7px;
-  background: var(--dark1);
-  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.07);
   box-shadow: var(--shadow-card);
-  transition: background 0.25s, border-color 0.25s;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  position: relative;
+}
+.pill:hover {
+  background: var(--bg4);
+  border-color: rgba(255,255,255,0.12);
 }
 .pill.prun {
   background: var(--accent-bg);
   border-color: var(--accent);
+  animation: pillGlow 2s ease-in-out infinite;
 }
 .pill.pdone {
-  background: var(--text);
-  border-color: var(--text);
+  background: rgba(53,160,181,0.10);
+  border-color: rgba(53,160,181,0.35);
+}
+.pill.pill-active {
+  border-color: rgba(53,160,181,0.6);
+  background: var(--bg4);
 }
 
 .pill-dot {
@@ -471,7 +482,7 @@ body {
 }
 .pill-dot.idle    { background: var(--dim); }
 .pill-dot.running { background: var(--accent); animation: pulseDot 1.2s ease-in-out infinite; }
-.pill-dot.done    { background: #FFFFFF; }
+.pill-dot.done    { background: var(--accent); }
 
 .pill-badge {
   font-family: var(--mono);
@@ -491,7 +502,7 @@ body {
 
 .pill-name { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); }
 .pill.prun  .pill-name { color: var(--text); }
-.pill.pdone .pill-name { color: #FFFFFF; }
+.pill.pdone .pill-name { color: #5AC8DC; }
 
 .pill-sub {
   font-family: var(--mono);
@@ -499,7 +510,7 @@ body {
   color: var(--dim);
   margin-top: 2px;
 }
-.pill.pdone .pill-sub { color: rgba(255,255,255,0.5); }
+.pill.pdone .pill-sub { color: rgba(90,200,220,0.5); }
 
 .pill-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
 
@@ -508,7 +519,7 @@ body {
   font-size: 9px;
   color: var(--dim);
 }
-.pill.pdone .pill-elapsed { color: rgba(255,255,255,0.6); }
+.pill.pdone .pill-elapsed { color: rgba(90,200,220,0.65); }
 
 .pill-retry {
   font-family: var(--mono);
@@ -536,9 +547,9 @@ body {
 
 /* ── Directive card ───────────────────────────────────────────────────────── */
 .dir-card {
-  background: var(--dark1);
+  background: var(--bg3);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -548,7 +559,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .dir-title {
@@ -569,14 +580,14 @@ body {
   border-radius: 3px;
   border: 1px solid;
 }
-.urgency-chip.immediate { background: var(--text);       color: #FFFFFF;        border-color: var(--text); }
-.urgency-chip.urgent    { background: rgba(0,0,0,0.08);  color: var(--light);   border-color: rgba(0,0,0,0.2); }
-.urgency-chip.planned   { background: rgba(0,0,0,0.04);  color: var(--muted);   border-color: rgba(0,0,0,0.12); }
+.urgency-chip.immediate { background: var(--accent);           color: #FFFFFF;       border-color: var(--accent); }
+.urgency-chip.urgent    { background: rgba(53,160,181,0.12);   color: var(--accent); border-color: rgba(53,160,181,0.3); }
+.urgency-chip.planned   { background: rgba(255,255,255,0.05);  color: var(--muted);  border-color: rgba(255,255,255,0.1); }
 
 .tailored-banner {
   padding: 9px 22px;
-  background: rgba(0,0,0,0.03);
-  border-bottom: 1px solid rgba(0,0,0,0.07);
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 500;
@@ -589,10 +600,10 @@ body {
 .dir-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
 
 .dir-action-box {
-  background: var(--bg3);
+  background: var(--bg4);
   box-shadow: var(--shadow-inset);
   border-radius: 6px;
-  border-left: 3px solid var(--text);
+  border-left: 3px solid var(--accent);
   padding: 14px 16px;
 }
 
@@ -647,7 +658,7 @@ body {
   font-style: italic;
   color: var(--muted);
   line-height: 1.85;
-  border-left: 2px solid rgba(0,0,0,0.15);
+  border-left: 2px solid rgba(53,160,181,0.3);
   padding-left: 16px;
 }
 
@@ -663,7 +674,7 @@ body {
 
 .post-cell {
   padding: 13px 15px;
-  border-right: 1px solid rgba(0,0,0,0.08);
+  border-right: 1px solid rgba(255,255,255,0.06);
 }
 .post-cell:last-child { border-right: none; }
 
@@ -727,9 +738,9 @@ body {
 
 /* ── Signal card ──────────────────────────────────────────────────────────── */
 .signal-card {
-  background: var(--dark1);
+  background: var(--bg3);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
   padding: 18px 18px 14px;
   display: flex;
@@ -801,11 +812,11 @@ body {
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #FFFFFF;
-  background: linear-gradient(160deg, var(--light) 0%, var(--text) 100%);
+  background: linear-gradient(160deg, #35A0B5 0%, #1E5E6E 100%);
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25), var(--shadow-btn);
+  box-shadow: 0 4px 16px rgba(53,160,181,0.3), var(--shadow-btn);
   transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
   position: relative;
   overflow: hidden;
@@ -827,8 +838,8 @@ body {
   align-items: center;
   gap: 14px;
   padding: 13px 18px;
-  background: rgba(0,0,0,0.03);
-  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   animation: fadeSlide 0.3s ease;
 }
@@ -886,9 +897,9 @@ body {
   flex-direction: column;
   gap: 8px;
   padding: 22px 20px;
-  background: var(--dark1);
+  background: var(--bg3);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 10px;
   cursor: pointer;
   text-align: left;
@@ -987,7 +998,7 @@ body {
 .reasoning-panel {
   width: 100%;
   background: var(--bg3);
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
   border-left: 3px solid var(--accent);
   border-radius: 8px;
   padding: 14px 16px;
@@ -1083,9 +1094,9 @@ body {
 
 /* Pulse ring on run-btn-large when not disabled (pre-click affordance) */
 @keyframes btnRingPulse {
-  0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 0   rgba(0,0,0,0.2); }
-  70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 8px rgba(0,0,0,0); }
-  100% { box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 0   rgba(0,0,0,0); }
+  0%   { box-shadow: 0 4px 16px rgba(53,160,181,0.3), 0 0 0 0   rgba(53,160,181,0.2); }
+  70%  { box-shadow: 0 4px 16px rgba(53,160,181,0.3), 0 0 0 8px rgba(53,160,181,0); }
+  100% { box-shadow: 0 4px 16px rgba(53,160,181,0.3), 0 0 0 0   rgba(53,160,181,0); }
 }
 
 .run-btn-large:not(:disabled) {
@@ -1153,3 +1164,92 @@ body {
   flex: 1;
   min-width: 0;
 }
+
+@keyframes pillGlow {
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 0 rgba(53,160,181,0); }
+  50%       { box-shadow: var(--shadow-card), 0 0 0 5px rgba(53,160,181,0.14), 0 0 16px rgba(53,160,181,0.08); }
+}
+
+/* ── Grid background for Tab 2 ───────────────────────────────────────────── */
+.tab2-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* ── Pill side blurb panel ────────────────────────────────────────────────── */
+.pill-blurb {
+  background: var(--bg3);
+  border: 1px solid rgba(53,160,181,0.25);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 18px;
+  animation: fadeSlide 0.2s ease;
+  width: 260px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: 24px;
+}
+
+.pill-blurb-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.pill-blurb-name {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.pill-blurb-text {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.pill-blurb-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.pill-blurb-close:hover { color: var(--muted); }
+
+/* ── Progress ring clickable ──────────────────────────────────────────────── */
+.ring-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.15s, filter 0.15s;
+}
+.ring-btn:hover {
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 12px rgba(53,160,181,0.35));
+}
+.ring-btn:active { transform: scale(0.98); }
