@@ -29,6 +29,10 @@ A policymaker gets:
 
 We don't just explain what's happening — we tell you what to do about it.
 
+## Architecture
+
+![PolySignal Pipeline Overview](./pipeline_overview.svg)
+
 ## How It Works
 
 PolySignal is built as a multi-agent pipeline designed for speed and efficiency.
