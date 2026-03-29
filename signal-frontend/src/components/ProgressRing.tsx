@@ -1,21 +1,24 @@
 import type { CSSProperties } from 'react';
+import { useCountUp } from '../hooks/useCountUp';
 
 interface Props {
   percent: number;           // 0-100
   done: boolean;
   stepName?: string;
   running: boolean;
+  size?: number;             // rendered px size, default 200
 }
 
-const SIZE   = 200;
+const BASE   = 200;
 const CX     = 100;
 const CY     = 100;
 const RADIUS = 78;
 const CIRC   = 2 * Math.PI * RADIUS;
 const STROKE = 10;
 
-export function ProgressRing({ percent, done, stepName, running }: Props) {
-  const clamp   = Math.max(0, Math.min(100, percent));
+export function ProgressRing({ percent, done, stepName, running, size = BASE }: Props) {
+  const clamp      = Math.max(0, Math.min(100, percent));
+  const displayPct = useCountUp(clamp, 800);
   const offset  = CIRC * (1 - clamp / 100);
   const arcColor  = done ? '#333333' : '#111111';
   const glowColor = done
@@ -25,8 +28,9 @@ export function ProgressRing({ percent, done, stepName, running }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
       <svg
-        width={SIZE}
-        height={SIZE}
+        width={size}
+        height={size}
+        viewBox={`0 0 ${BASE} ${BASE}`}
         style={{ overflow: 'visible' }}
         role="img"
         aria-label={`${clamp}% complete`}
@@ -71,7 +75,7 @@ export function ProgressRing({ percent, done, stepName, running }: Props) {
             letterSpacing: '-0.02em',
           }}
         >
-          {clamp}%
+          {displayPct}%
         </text>
 
         <text

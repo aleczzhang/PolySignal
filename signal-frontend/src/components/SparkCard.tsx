@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import type { SparkMarket } from '../types';
+import { useCountUp } from '../hooks/useCountUp';
 
 interface Props {
   market: SparkMarket;
@@ -61,6 +62,7 @@ function drawSparkline(canvas: HTMLCanvasElement, data: number[], color: string)
 export function SparkCard({ market }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
+  const probPct   = useCountUp(Math.round(market.probability * 100));
 
   useEffect(() => {
     // Double rAF to guarantee layout before measuring
@@ -105,7 +107,7 @@ export function SparkCard({ market }: Props) {
           color: '#111111',
           lineHeight: 1,
         }}>
-          {Math.round(market.probability * 100)}%
+          {probPct}%
         </span>
         <span style={{
           fontFamily: 'var(--mono)',

@@ -5,11 +5,11 @@ import type { DomainId } from './types'
 
 // ── Domain config ─────────────────────────────────────────────────────────────
 
-const DOMAINS: { id: DomainId; name: string; emoji: string; sub: string; volume: string; desc: string }[] = [
-  { id: 'iran-oil',    name: 'Iran · Oil Crisis', emoji: '🛢️',  sub: 'ENERGY·FUTURES',  volume: '$4.2B', desc: 'Hormuz closure risk, crude supply shocks, and SPR drawdown signals.' },
-  { id: 'us-election', name: 'US Election',        emoji: '🗳️', sub: 'POLITICAL·POLLS', volume: '$890M', desc: 'Swing-state presidential, Senate, and House probability shifts.' },
-  { id: 'fed-rates',   name: 'Fed Rates',           emoji: '📊', sub: 'MONETARY·MACRO',  volume: '$1.1B', desc: 'FOMC rate-cut probability, CPI trajectory, and recession signals.' },
-  { id: 'crypto',      name: 'Crypto / Bitcoin',    emoji: '₿',  sub: 'DIGITAL·ASSETS', volume: '$2.3B', desc: 'BTC price outlook, ETF approval odds, and regulatory regime signals.' },
+const DOMAINS: { id: DomainId; name: string; iconCode: string; sub: string; volume: string; desc: string }[] = [
+  { id: 'iran-oil',    name: 'Iran · Oil Crisis', iconCode: 'OIL', sub: 'ENERGY·FUTURES',  volume: '$4.2B', desc: 'Hormuz closure risk, crude supply shocks, and SPR drawdown signals.' },
+  { id: 'us-election', name: 'US Election',        iconCode: 'GOV', sub: 'POLITICAL·POLLS', volume: '$890M', desc: 'Swing-state presidential, Senate, and House probability shifts.' },
+  { id: 'fed-rates',   name: 'Fed Rates',           iconCode: 'FED', sub: 'MONETARY·MACRO',  volume: '$1.1B', desc: 'FOMC rate-cut probability, CPI trajectory, and recession signals.' },
+  { id: 'crypto',      name: 'Crypto / Bitcoin',    iconCode: 'BTC', sub: 'DIGITAL·ASSETS', volume: '$2.3B', desc: 'BTC price outlook, ETF approval odds, and regulatory regime signals.' },
 ]
 
 // ── Signal meta: question + why it matters per domain × market ────────────────
@@ -53,24 +53,24 @@ function mockMarkets(domain: DomainId): SparkMarket[] {
 
   const MAP: Record<DomainId, SparkMarket[]> = {
     'iran-oil': [
-      { name: 'Hormuz closure by June?',   probability: 0.67, delta24h:  0.03, probHistory: seed(1, 0.35), source: 'Polymarket', color: '#111111' },
-      { name: 'Brent > $120 / barrel?',    probability: 0.54, delta24h:  0.07, probHistory: seed(2, 0.2),  source: 'Polymarket', color: '#555555' },
-      { name: 'SPR Release > 50M bbl?',    probability: 0.42, delta24h:  0.05, probHistory: seed(3, 0.1),  source: 'Kalshi',     color: '#888888' },
+      { name: 'Hormuz closure by June?',   probability: 0.67, delta24h:  0.03, probHistory: seed(1, 0.35), source: 'Polymarket', color: '#246B78' },
+      { name: 'Brent > $120 / barrel?',    probability: 0.54, delta24h:  0.07, probHistory: seed(2, 0.2),  source: 'Polymarket', color: '#35899A' },
+      { name: 'SPR Release > 50M bbl?',    probability: 0.42, delta24h:  0.05, probHistory: seed(3, 0.1),  source: 'Kalshi',     color: '#5AABB8' },
     ],
     'us-election': [
-      { name: 'Rep. wins presidency?',     probability: 0.58, delta24h: -0.02, probHistory: seed(4, 0.25), source: 'Polymarket', color: '#111111' },
-      { name: 'Dem. wins Senate?',         probability: 0.51, delta24h:  0.01, probHistory: seed(5, 0.18), source: 'Kalshi',     color: '#555555' },
-      { name: 'Dem. wins House?',          probability: 0.47, delta24h: -0.03, probHistory: seed(6, 0.14), source: 'Polymarket', color: '#888888' },
+      { name: 'Rep. wins presidency?',     probability: 0.58, delta24h: -0.02, probHistory: seed(4, 0.25), source: 'Polymarket', color: '#246B78' },
+      { name: 'Dem. wins Senate?',         probability: 0.51, delta24h:  0.01, probHistory: seed(5, 0.18), source: 'Kalshi',     color: '#35899A' },
+      { name: 'Dem. wins House?',          probability: 0.47, delta24h: -0.03, probHistory: seed(6, 0.14), source: 'Polymarket', color: '#5AABB8' },
     ],
     'fed-rates': [
-      { name: 'Fed cuts June FOMC?',       probability: 0.73, delta24h:  0.05, probHistory: seed(7, 0.4),  source: 'Polymarket', color: '#111111' },
-      { name: 'CPI < 3% by Q3?',           probability: 0.61, delta24h:  0.04, probHistory: seed(8, 0.28), source: 'Kalshi',     color: '#555555' },
-      { name: 'Recession in 2025?',        probability: 0.38, delta24h: -0.02, probHistory: seed(9, 0.05), source: 'Polymarket', color: '#888888' },
+      { name: 'Fed cuts June FOMC?',       probability: 0.73, delta24h:  0.05, probHistory: seed(7, 0.4),  source: 'Polymarket', color: '#246B78' },
+      { name: 'CPI < 3% by Q3?',           probability: 0.61, delta24h:  0.04, probHistory: seed(8, 0.28), source: 'Kalshi',     color: '#35899A' },
+      { name: 'Recession in 2025?',        probability: 0.38, delta24h: -0.02, probHistory: seed(9, 0.05), source: 'Polymarket', color: '#5AABB8' },
     ],
     'crypto': [
-      { name: 'BTC > $100k by EOY?',       probability: 0.69, delta24h:  0.06, probHistory: seed(10, 0.36), source: 'Polymarket', color: '#111111' },
-      { name: 'ETH ETF approved?',         probability: 0.78, delta24h:  0.08, probHistory: seed(11, 0.45), source: 'Kalshi',     color: '#555555' },
-      { name: 'SEC drops BTC case?',       probability: 0.55, delta24h:  0.03, probHistory: seed(12, 0.22), source: 'Polymarket', color: '#888888' },
+      { name: 'BTC > $100k by EOY?',       probability: 0.69, delta24h:  0.06, probHistory: seed(10, 0.36), source: 'Polymarket', color: '#246B78' },
+      { name: 'ETH ETF approved?',         probability: 0.78, delta24h:  0.08, probHistory: seed(11, 0.45), source: 'Kalshi',     color: '#35899A' },
+      { name: 'SEC drops BTC case?',       probability: 0.55, delta24h:  0.03, probHistory: seed(12, 0.22), source: 'Polymarket', color: '#5AABB8' },
     ],
   }
   return MAP[domain]
@@ -108,7 +108,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-layout" style={{ display: 'flex', width: '100%', minHeight: '100vh' }}>
+    <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh' }}>
       <Sidebar
         activeTab={tab}
         onTabChange={setTab}
@@ -161,6 +161,13 @@ export default function App() {
 // ── Inline tab components (will be extracted to own files next) ───────────────
 
 import { useRef as useCanvasRef, useEffect as useCanvasEffect } from 'react'
+import { useCountUp } from './hooks/useCountUp'
+
+// Animates a number from 0 to `n` on mount/change
+function AnimatedNum({ n, suffix = '' }: { n: number; suffix?: string }) {
+  const v = useCountUp(n, 650)
+  return <>{v}{suffix}</>
+}
 
 // Bare sparkline canvas (no card chrome) — used inside signal-cards
 function SparkLine({ data, color }: { data: number[]; color: string }) {
@@ -249,17 +256,6 @@ function Tab1Setup({
 
   return (
     <>
-      <div className="panel-header">
-        <div>
-          <div className="panel-title"><span className="bw">👋</span> Build your signal brief</div>
-          <div className="panel-sub">Three steps to a tailored intelligence directive</div>
-        </div>
-        <div className="live-chip">
-          <div className="live-dot" />
-          Live Data
-        </div>
-      </div>
-
       <div style={{ padding: '28px 30px', display: 'flex', flexDirection: 'column', gap: 40 }}>
 
         {/* ── Profile (collapses to banner) ──────────────────────────────── */}
@@ -331,7 +327,7 @@ function Tab1Setup({
                 onClick={() => onDomainChange(d.id)}
                 disabled={running}
               >
-                <div className="domain-card-lg-emoji"><span className="bw">{d.emoji}</span></div>
+                <div className="domain-card-lg-icon">{d.iconCode}</div>
                 <div className="domain-card-lg-name">{d.name}</div>
                 <div className="domain-card-lg-sub">{d.sub}</div>
                 <div className="domain-card-lg-desc">{d.desc}</div>
@@ -341,43 +337,39 @@ function Tab1Setup({
           </div>
         </section>
 
-        {/* ── Step 02: Key signals (revealed on domain select) ──────────── */}
+        {/* ── Step 02: Market preview (revealed on domain select) ───────── */}
         {domain && signalMeta && (
-          <section className="flow-step" ref={step2Ref} style={{ animation: 'fadeSlide 0.35s ease' }}>
+          <section key={domain} className="flow-step" ref={step2Ref} style={{ animation: 'fadeSlide 0.35s ease' }}>
             <div>
               <div className="flow-step-header">
                 <span className="flow-step-num">Step 02</span>
-                <span className="flow-step-title">Key signals affecting your decision</span>
+                <span className="flow-step-title">Markets being analyzed</span>
               </div>
               <p className="flow-step-desc">
-                These are the three prediction markets with the strongest correlation to downstream outcomes in <strong>{selectedDomain?.name}</strong>.
-                Review the live probabilities and understand why each signal matters before running the pipeline.
+                Live prediction market probabilities for <strong>{selectedDomain?.name}</strong> from Polymarket and Kalshi.
+                The pipeline will screen these, build a correlation lag matrix, and select the causal cluster.
               </p>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {markets.map((m, i) => {
                 const meta = signalMeta[i as 0 | 1 | 2]
                 return (
                   <div key={i} className="signal-card">
-                    <div className="signal-question">{meta.question}</div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                      <div className="signal-question">{meta.question}</div>
+                      <span className="source-badge">{m.source}</span>
+                    </div>
 
                     <div className="signal-prob-row">
-                      <span className="signal-prob">{Math.round(m.probability * 100)}%</span>
+                      <span className="signal-prob"><AnimatedNum n={Math.round(m.probability * 100)} suffix="%" /></span>
                       <span className={`signal-delta ${m.delta24h >= 0 ? 'pos' : 'neg'}`}>
                         {m.delta24h >= 0 ? '+' : ''}{Math.round(m.delta24h * 100)}% today
-                      </span>
-                      <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--dim)', marginLeft: 'auto', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        {m.source}
                       </span>
                     </div>
 
                     <div>
-                      <div className="signal-trend-label">Last 30 days</div>
+                      <div className="signal-trend-label">30-day probability trend</div>
                       <SparkLine data={m.probHistory} color={m.color} />
-                    </div>
-
-                    <div className="signal-why">
-                      <strong>Why it matters: </strong>{meta.whyItMatters}
                     </div>
                   </div>
                 )
@@ -454,27 +446,43 @@ function Tab1Setup({
 
 // ── Tab 2 ─────────────────────────────────────────────────────────────────────
 
-const PILL_CONFIGS: (PillConfig & { agentKey: string })[] = [
-  { label: 'fetchMarkets()',         sub: 'Polymarket + Kalshi enrichment',      badge: 'code', maxRetries: null, agentKey: 'MarketFetcherAgent'       },
-  { label: 'Statistical screener',  sub: 'Lag matrix + regime classification',  badge: 'math', maxRetries: null, agentKey: 'StatisticalScreenerAgent'  },
-  { label: 'Correlation validation',sub: 'Cluster r-score validation',           badge: 'math', maxRetries: 3,   agentKey: 'K2ThinkV2-Orchestrator'    },
-  { label: 'K2 — cluster selection',sub: 'Causal chain market selection',        badge: 'k2',   maxRetries: 3,   agentKey: 'K2ThinkV2-Orchestrator'    },
-  { label: 'K2 — causal reasoning', sub: 'Mechanism + confounding analysis',    badge: 'k2',   maxRetries: 2,   agentKey: 'K2ThinkV2-CausalReasoning'  },
-  { label: 'K2 — math analysis',    sub: 'Joint posterior + CI calculation',    badge: 'k2',   maxRetries: null, agentKey: 'K2ThinkV2-MathReasoning'   },
+// Sequential stages (rendered top-to-bottom with connectors)
+const SEQUENTIAL_PILLS: (PillConfig & { agentKey: string })[] = [
+  { label: 'fetchMarkets()',      sub: 'Polymarket + Kalshi enrichment',               badge: 'code', maxRetries: null, agentKey: 'MarketFetcherAgent'      },
+  { label: 'Statistical screener', sub: 'Lag matrix + regime classification',          badge: 'math', maxRetries: null, agentKey: 'StatisticalScreenerAgent' },
+  { label: 'K2 — orchestration', sub: 'Correlation validation · cluster selection',    badge: 'k2',   maxRetries: 3,   agentKey: 'K2ThinkV2-Orchestrator'   },
 ]
+
+// Parallel K2 agents (rendered side-by-side)
+const PARALLEL_PILLS: (PillConfig & { agentKey: string })[] = [
+  { label: 'K2 — causal reasoning', sub: 'Mechanism + confounding analysis',          badge: 'k2',   maxRetries: 2,   agentKey: 'K2ThinkV2-CausalReasoning' },
+  { label: 'K2 — math analysis',    sub: 'Joint posterior + CI calculation',          badge: 'k2',   maxRetries: null, agentKey: 'K2ThinkV2-MathReasoning'  },
+]
+
+// All unique agent keys for progress calculation
+const ALL_PILL_KEYS = [...SEQUENTIAL_PILLS, ...PARALLEL_PILLS].map(p => p.agentKey)
 
 function Tab2Analysis({ state, done }: { state: PipelineState; done: boolean }) {
   const agents = state.agents
+  const streamEndRef = useRef<HTMLDivElement>(null)
 
-  // Progress: count completed agents out of total expected
-  const allKeys = PILL_CONFIGS.map(p => p.agentKey)
-  const uniqueKeys = [...new Set(allKeys)]
+  // Progress: count completed agents out of total unique keys
+  const uniqueKeys = [...new Set(ALL_PILL_KEYS)]
   const completedCount = uniqueKeys.filter(k => agents[k]?.status === 'complete').length
   const percent = done ? 100 : Math.round((completedCount / uniqueKeys.length) * 95)
 
-  // Current step name from first running agent
-  const runningAgent = Object.values(agents).find(a => a.status === 'running' || a.status === 'streaming')
+  // Current step name + streaming text from first running agent
+  const streamingAgent = Object.values(agents).find(a => a.status === 'streaming')
+  const runningAgent   = Object.values(agents).find(a => a.status === 'running' || a.status === 'streaming')
   const stepName = runningAgent?.id?.replace('K2ThinkV2-', 'K2 ').replace('Agent', '') ?? ''
+
+  // Last completed K2 decision
+  const lastDecision = state.k2Decisions[state.k2Decisions.length - 1]
+
+  // Auto-scroll reasoning stream
+  useEffect(() => {
+    streamEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [streamingAgent?.partialText])
 
   return (
     <>
@@ -485,27 +493,116 @@ function Tab2Analysis({ state, done }: { state: PipelineState; done: boolean }) 
         </div>
       </div>
 
-      <div style={{ padding: '32px 30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
+      <div style={{ padding: '28px 30px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', maxWidth: 680, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
 
-        <ProgressRing
-          percent={percent}
-          done={done}
-          running={state.running}
-          stepName={stepName || undefined}
-        />
+          {/* Progress ring — centered, larger */}
+          <ProgressRing
+            percent={percent}
+            done={done}
+            running={state.running}
+            stepName={stepName || undefined}
+            size={240}
+          />
 
-        <div style={{ width: '100%', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 7 }}>
-          {PILL_CONFIGS.map((cfg, i) => (
-            <AgentPill key={i} config={cfg} agentState={agents[cfg.agentKey]} />
-          ))}
-        </div>
+          {/* Pipeline — visual flow with connectors + parallel split */}
+          <div className="ps-flow">
+            {/* Sequential: fetch → screener → orchestrator */}
+            {SEQUENTIAL_PILLS.map((cfg) => (
+              <div key={cfg.agentKey} className="ps-stage-wrap">
+                <AgentPill config={cfg} agentState={agents[cfg.agentKey]} />
+                <div className="ps-connector" />
+              </div>
+            ))}
 
-        {state.error && (
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', padding: '10px 16px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6, background: 'var(--bg3)' }}>
-            ⚠ {state.error}
+            {/* Parallel K2 analysis section */}
+            <div className="ps-parallel-label">
+              <div className="ps-parallel-dot" />
+              K2 parallel analysis
+              <div className="ps-parallel-line" />
+            </div>
+            <div className="ps-parallel-cards">
+              {PARALLEL_PILLS.map((cfg) => (
+                <AgentPill key={cfg.agentKey} config={cfg} agentState={agents[cfg.agentKey]} />
+              ))}
+            </div>
           </div>
-        )}
 
+          {state.error && (
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', padding: '10px 16px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 6, background: 'var(--bg3)', width: '100%' }}>
+              ⚠ {state.error}
+            </div>
+          )}
+
+          {/* Live stream panel — below pipeline */}
+          {streamingAgent && streamingAgent.partialText && (
+            <div className="reasoning-panel">
+              <div className="reasoning-panel-label">
+                K2 Think V2 — {streamingAgent.id?.replace('K2ThinkV2-', '').replace('Agent', '')} — reasoning
+              </div>
+              <div className="reasoning-panel-text">
+                {streamingAgent.partialText}
+                <span className="reasoning-cursor" />
+                <div ref={streamEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* Working indicator when running but no text yet */}
+          {runningAgent && !streamingAgent && (
+            <div className="reasoning-panel">
+              <div className="reasoning-panel-label">
+                {runningAgent.id?.replace('K2ThinkV2-', '').replace('Agent', '')} — processing
+              </div>
+              <div className="reasoning-panel-text" style={{ color: 'var(--dim)' }}>
+                Fetching data and running analysis
+                <span style={{ animation: 'pulseDot 1.2s ease-in-out infinite', display: 'inline-block', marginLeft: 4 }}>…</span>
+              </div>
+            </div>
+          )}
+
+          {/* Last K2 decision */}
+          {lastDecision && (
+            <div style={{
+              width: '100%',
+              background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)',
+              borderRadius: 8,
+              padding: '12px 16px',
+              animation: 'fadeSlide 0.3s ease',
+            }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 8, color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6 }}>
+                Last K2 decision
+              </div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}>
+                {lastDecision.decision}
+              </div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--dim)', marginTop: 6 }}>
+                → {lastDecision.agent.replace('K2ThinkV2-', '').replace('Agent', '')} · {new Date(lastDecision.timestamp).toLocaleTimeString()}
+              </div>
+            </div>
+          )}
+
+          {/* Done state */}
+          {done && (
+            <div style={{
+              width: '100%',
+              background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)',
+              borderRadius: 8,
+              padding: '16px 18px',
+              animation: 'fadeSlide 0.4s ease',
+            }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>
+                Pipeline complete
+              </div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                Signal confirmed — switching to Results
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
     </>
   )
