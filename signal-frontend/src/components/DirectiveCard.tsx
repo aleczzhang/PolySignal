@@ -303,35 +303,6 @@ export function DirectiveCard({ domain, role, org, result }: Props) {
         {/* Reasoning */}
         <p className="dir-reasoning">{reasoning}</p>
 
-        {/* Posterior strip */}
-        <div className="post-strip">
-          <div className="post-cell">
-            <div className="post-cell-label">Joint Posterior</div>
-            <div className="post-cell-value" style={{ color: 'var(--text)' }}>
-              {jointPost != null ? `${Math.round(jointPost * 100)}%` : '—'}
-            </div>
-          </div>
-          <div className="post-cell">
-            <div className="post-cell-label">80% CI</div>
-            <div className="post-cell-value" style={{ color: 'var(--muted)', fontSize: 14 }}>
-              {ciLow != null && ciHigh != null
-                ? `${Math.round(ciLow * 100)}–${Math.round(ciHigh * 100)}%`
-                : '—'}
-            </div>
-          </div>
-          <div className="post-cell">
-            <div className="post-cell-label">Action Window</div>
-            <div className="post-cell-value" style={{ color: 'var(--light)' }}>
-              {actionDays != null ? `${actionDays}d` : window_}
-            </div>
-          </div>
-          <div className="post-cell">
-            <div className="post-cell-label">Signal Score</div>
-            <div className="post-cell-value" style={{ color: scoreColor }}>
-              {signalScore != null ? `${Math.round(signalScore)}` : '—'}
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>
